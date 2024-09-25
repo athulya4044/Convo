@@ -23,16 +23,16 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 
-app.listen(PORT, (req, res) => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
-
 mongoose
   .connect(DATABASE_URL)
   .then(() => console.log("Database connected successfully"))
-  .catch((err) => console.log(err.message));
+  .catch((err) => console.log("Database connection error: ", err.message));
 
 // routes
 app.get("/", (req, res) => {
   return res.json({ status: "Convo backend server" });
+});
+
+app.listen(PORT, (req, res) => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
