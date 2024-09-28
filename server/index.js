@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import userRoutes from './routes/userRoutes.js';
 
 dotenv.config();
 
@@ -27,6 +28,8 @@ mongoose
   .connect(DATABASE_URL)
   .then(() => console.log("Database connected successfully"))
   .catch((err) => console.log("Database connection error: ", err.message));
+
+  app.use('/api/users', userRoutes);
 
 // routes
 app.get("/", (req, res) => {
