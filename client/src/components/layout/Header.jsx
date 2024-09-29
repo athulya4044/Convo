@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { Menu, X } from "lucide-react";
-import { logo } from "../../assets/images";
+import { logoConvo } from "../../assets/images";
 import { Link, useNavigate } from "react-router-dom";
 
 const Header = () => {
@@ -19,7 +19,7 @@ const Header = () => {
           <Link to={"/"} className="flex items-center justify-start gap-3">
             <img
               className="w-[50px] object-contain"
-              src={logo}
+              src={logoConvo}
               alt="Convo logo"
             />
             Convo
