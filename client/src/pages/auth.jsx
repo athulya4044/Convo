@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -9,23 +9,48 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, CircleAlert, CircleCheck, X } from "lucide-react";
 import { auth } from "@/assets/images";
 import { Link } from "react-router-dom";
-import axios from "axios"; 
+import axios from "axios";
 
 function Auth() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  // converting on form state obj to simplify state management
+  const [formState, setFormState] = useState({
+    email: "",
+    password: "",
+    name: "",
+    confirmPassword: "",
+  });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
+
+  // reset UI on tab change, had a bug when an error; persisted even on tab change
+  const resetAuthUi = () => {
+    setLoading("");
+    setError("");
+    setFormState({
+      email: "",
+      password: "",
+      name: "",
+      confirmPassword: "",
+    });
+  };
+
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormState((prevState) => ({
+      ...prevState,
+      [id]: value,
+    }));
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -34,13 +59,15 @@ function Auth() {
 
     try {
       await axios.post("http://localhost:4000/api/users/login", {
-        email,
-        password,
+        email: formState.email,
+        password: formState.password,
       });
-      navigate("/"); 
+
+      // go to dashboard
+      navigate("/");
     } catch (err) {
       console.error("Error during login:", err);
-      setError("Login failed. Please check your credentials.");
+      setError("Login failed. Please check your credentials !");
     } finally {
       setLoading(false);
     }
@@ -51,22 +78,30 @@ function Auth() {
     setLoading(true);
     setError("");
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match!");
+    if (formState.password !== formState.confirmPassword) {
+      setError("Passwords do not match !");
       setLoading(false);
       return;
     }
 
     try {
-      await axios.post("http://localhost:4000/api/users/register", {
-        name,
-        email,
-        password,
+      let res = await axios.post("http://localhost:4000/api/users/register", {
+        name: formState.name,
+        email: formState.email,
+        password: formState.password,
       });
-      navigate("/"); 
+
+      // same email signup error handling
+      if (res.data.error) {
+        setError(res.data.error);
+        return;
+      }
+
+      resetAuthUi();
+      setMessage(res.data.message);
     } catch (err) {
       console.error("Error during signup:", err);
-      setError("Registration failed. Please try again.");
+      setError("Registration failed. Please try again !");
     } finally {
       setLoading(false);
     }
@@ -77,22 +112,55 @@ function Auth() {
       <Card className="w-full md:max-w-[60vw]">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold my-2">
-            Welcome to <span className="text-primary">Convo</span>!
+            Welcome to <span className="text-primary">Convo</span> !
           </CardTitle>
           <CardDescription className="my-2">
             Sign in to your account or create a new one
           </CardDescription>
         </CardHeader>
+        {message && (
+          // dismissable alert
+          <Alert className="mx-auto w-[95%] my-5 flex-col justify-center items-center bg-green-50 text-green-500">
+            <div className="flex justify-between items-start">
+              <div className="mb-2 flex justify-start items-center gap-2">
+                <CircleCheck size={16} color="#22c55e" />
+                <AlertTitle>Success</AlertTitle>
+              </div>
+              <X
+                className="cursor-pointer"
+                size={16}
+                color="#22c55e"
+                onClick={() => setMessage("")}
+              />
+            </div>
+            <AlertDescription>{message}</AlertDescription>
+          </Alert>
+        )}
         <CardContent className="flex flex-col-reverse lg:flex-row gap-8">
           <div className="flex-1">
-            <Tabs defaultValue="login" className="w-full">
+            <Tabs
+              defaultValue="login"
+              className="w-full"
+              onValueChange={resetAuthUi}
+            >
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">Login</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
               </TabsList>
 
               <TabsContent value="login">
-                {error && <p className="text-red-500">{error}</p>}
+                {error && (
+                  <Alert
+                    className="my-5 flex-col justify-center items-center"
+                    variant="destructive"
+                  >
+                    <div className="mb-2 flex justify-start items-center gap-2">
+                      <CircleAlert size={16} color="#ef4444" />
+                      <AlertTitle>Error</AlertTitle>
+                    </div>
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
@@ -100,8 +168,8 @@ function Auth() {
                       id="email"
                       type="email"
                       placeholder="m@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      value={formState.email}
+                      onChange={handleInputChange}
                       required
                     />
                   </div>
@@ -110,8 +178,8 @@ function Auth() {
                     <Input
                       id="password"
                       type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      value={formState.password}
+                      onChange={handleInputChange}
                       required
                     />
                   </div>
@@ -121,62 +189,69 @@ function Auth() {
                     disabled={loading}
                   >
                     {loading ? "Logging in..." : "Login"}
-                    <ArrowRight strokeWidth={1} />
+                    {!loading && <ArrowRight strokeWidth={1} />}
                   </Button>
                 </form>
               </TabsContent>
 
               <TabsContent value="signup">
-                {error && <p className="text-red-500">{error}</p>}
+                {error && (
+                  <Alert
+                    className="my-5 flex-col justify-center items-center"
+                    variant="destructive"
+                  >
+                    <div className="mb-2 flex justify-start items-center gap-2">
+                      <CircleAlert size={16} color="#ef4444" />
+                      <AlertTitle>Error</AlertTitle>
+                    </div>
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Name</Label>
                     <Input
                       id="name"
                       placeholder="John Doe"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      value={formState.name}
+                      onChange={handleInputChange}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
+                    <Label htmlFor="email">Email</Label>
                     <Input
-                      id="signup-email"
+                      id="email"
                       type="email"
                       placeholder="m@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      value={formState.email}
+                      onChange={handleInputChange}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
+                    <Label htmlFor="password">Password</Label>
                     <Input
-                      id="signup-password"
+                      id="password"
                       type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      value={formState.password}
+                      onChange={handleInputChange}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="confirm-password">Confirm Password</Label>
+                    <Label htmlFor="confirmPassword">Confirm Password</Label>
                     <Input
-                      id="confirm-password"
+                      id="confirmPassword"
                       type="password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      value={formState.confirmPassword}
+                      onChange={handleInputChange}
                       required
                     />
                   </div>
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    disabled={loading}
-                  >
+                  <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? "Signing up..." : "Create Account"}
-                    <ArrowRight strokeWidth={1} />
+                    {!loading && <ArrowRight strokeWidth={1} />}
                   </Button>
                 </form>
               </TabsContent>
@@ -188,7 +263,7 @@ function Auth() {
         </CardContent>
         <CardFooter>
           <CardDescription className="w-full text-center">
-            Forgot password ? No worries,{" "}
+            Forgot password? No worries,{" "}
             <Link
               to={"/forgot-password"}
               className="cursor-pointer underline text-primary"
