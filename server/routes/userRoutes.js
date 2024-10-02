@@ -4,7 +4,8 @@ import {
   loginUser,
   getAllUsers,
   getUserById,
-  getUserByEmail,
+  getUserByEmailAndSendEmail,
+  resetUserPassword,
 } from "../controllers/userController.js";
 
 const router = express.Router();
@@ -19,7 +20,10 @@ router.post("/login", loginUser);
 router.get("/:id", getUserById);
 
 // Get a user by email
-router.post("/forgot-password/:email", getUserByEmail);
+router.get("/forgot-password/:email", getUserByEmailAndSendEmail);
+
+// Reset user password
+router.post("/reset-password", resetUserPassword);
 
 // Get all users
 router.get("/", getAllUsers);

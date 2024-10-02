@@ -57,7 +57,7 @@ const Home = () => {
         </p>
       </section>
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12 max-w-6xl mx-auto">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12 max-w-6xl mx-auto place-items-center">
         <Card className="bg-purple-200 max-w-xs mx-auto">
           <CardHeader className="flex justify-center">
             <img src={ai} alt="AI Help" className="w-30 h-24 mx-auto" />
