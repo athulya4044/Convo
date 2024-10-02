@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -13,10 +13,18 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { ArrowRight, CircleAlert, CircleCheck, X } from "lucide-react";
+import {
+  ArrowRight,
+  CircleAlert,
+  CircleCheck,
+  X,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { auth } from "@/assets/images";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { AppContext } from "@/utils/store/appContext";
 
 function Auth() {
   // converting on form state obj to simplify state management
@@ -29,8 +37,16 @@ function Auth() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const navigate = useNavigate();
+  const { login, logout } = useContext(AppContext);
+
+  // when loggedin and on auth, logout
+  useEffect(() => {
+    logout();
+  }, [logout]);
 
   // reset UI on tab change, had a bug when an error; persisted even on tab change
   const resetAuthUi = () => {
@@ -42,6 +58,8 @@ function Auth() {
       name: "",
       confirmPassword: "",
     });
+    setShowPassword(false);
+    setShowConfirmPassword(false);
   };
 
   const handleInputChange = (e) => {
@@ -64,7 +82,10 @@ function Auth() {
       });
 
       // go to dashboard
-      navigate("/");
+      login({
+        email: formState.email,
+      });
+      navigate("/dashboard");
     } catch (err) {
       console.error("Error during login:", err);
       setError("Login failed. Please check your credentials !");
@@ -175,13 +196,28 @@ function Auth() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={formState.password}
-                      onChange={handleInputChange}
-                      required
-                    />
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        value={formState.password}
+                        onChange={handleInputChange}
+                        required
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-2 top-1/2 -translate-y-1/2"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
                   <Button
                     type="submit"
@@ -231,23 +267,55 @@ function Auth() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={formState.password}
-                      onChange={handleInputChange}
-                      required
-                    />
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        value={formState.password}
+                        onChange={handleInputChange}
+                        required
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-2 top-1/2 -translate-y-1/2"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="confirmPassword">Confirm Password</Label>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      value={formState.confirmPassword}
-                      onChange={handleInputChange}
-                      required
-                    />
+                    <div className="relative">
+                      <Input
+                        id="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        value={formState.confirmPassword}
+                        onChange={handleInputChange}
+                        required
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-2 top-1/2 -translate-y-1/2"
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? "Signing up..." : "Create Account"}
