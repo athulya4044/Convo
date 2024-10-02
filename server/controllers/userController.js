@@ -8,11 +8,9 @@ export const registerUser = async (req, res) => {
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res
-        .status(200)
-        .json({
-          error: "User already exists. Please try with a different email",
-        });
+      return res.status(200).json({
+        error: "User already exists. Please try with a different email",
+      });
     }
 
     const saltRounds = 10;
@@ -26,12 +24,10 @@ export const registerUser = async (req, res) => {
 
     await newUser.save();
 
-    res
-      .status(201)
-      .json({
-        message: "User registered successfully ! Please Login to continue",
-        user: newUser,
-      });
+    res.status(201).json({
+      message: "User registered successfully. Please Login to continue",
+      user: newUser,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -74,6 +70,25 @@ export const getUserById = async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found" });
     res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// get user by email
+export const getUserByEmail = async (req, res) => {
+  try {
+    const { email } = req.params;
+    const user = await User.findOne({ email });
+    if (!user)
+      return res.status(200).json({
+        error: "User not found with the associated email. Please try again",
+      });
+    console.log(user);
+    res.status(200).json({
+      message:
+        "We've sent you an email with instructions to reset your password.",
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
