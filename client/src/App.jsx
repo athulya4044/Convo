@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import Test from "./pages/index";
+import Home from "./pages/index";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import Auth from "./pages/auth";
@@ -11,7 +11,7 @@ const App = () => {
       <Header />
       <main className="my-6 w-[100vw] min-h-[70vh] h-auto flex justify-center items-center">
         <Routes>
-          <Route path="/" element={<Test />} />
+          <Route path="/" element={<Home />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
         </Routes>
