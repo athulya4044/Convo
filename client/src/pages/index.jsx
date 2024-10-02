@@ -60,7 +60,7 @@ const Home = () => {
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12 max-w-6xl mx-auto">
         <Card className="bg-purple-200 max-w-xs mx-auto">
           <CardHeader className="flex justify-center">
-            <img src={ai} alt="AI Help" className="w-32 h-24" />
+            <img src={ai} alt="AI Help" className="w-30 h-24 mx-auto" />
           </CardHeader>
           <CardContent className="text-center">
             <CardTitle className="text-xl font-semibold text-purple-900">
@@ -74,7 +74,7 @@ const Home = () => {
 
         <Card className="bg-purple-200 max-w-xs mx-auto">
           <CardHeader className="flex justify-center">
-            <img src={realtime} alt="Real Time Chat" className="w-32 h-24" />
+            <img src={realtime} alt="Real Time Chat" className="w-30 h-24 mx-auto" />
           </CardHeader>
           <CardContent className="text-center text-purple-900">
             <CardTitle className="text-xl font-semibold text-purple-900">
@@ -88,7 +88,7 @@ const Home = () => {
 
         <Card className="bg-purple-200 max-w-xs mx-auto">
           <CardHeader className="flex justify-center">
-            <img src={videocall} alt="Virtual Meeting" className="w-32 h-24" />
+            <img src={videocall} alt="Virtual Meeting" className="w-30 h-24 mx-auto" />
           </CardHeader>
           <CardContent className="text-center">
             <CardTitle className="text-xl font-semibold text-purple-900">
@@ -100,10 +100,10 @@ const Home = () => {
           </CardContent>
         </Card>
 
-        <div className="lg:col-span-3 flex justify-center mt-6 gap-6 lg:mt-0">
-          <Card className="bg-purple-200 max-w-xs mr-[30px]">
+        <div className="lg:col-span-3 flex justify-center gap-6">
+          <Card className="bg-purple-200 max-w-xs">
             <CardHeader className="flex justify-center">
-              <img src={fileshare} alt="File Sharing" className="w-32 h-24" />
+              <img src={fileshare} alt="File Sharing" className="w-30 h-24 mx-auto" />
             </CardHeader>
             <CardContent className="text-center">
               <CardTitle className="text-xl font-semibold text-purple-900">
@@ -115,9 +115,9 @@ const Home = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-purple-200 max-w-xs ml-[30px]">
+          <Card className="bg-purple-200 max-w-xs">
             <CardHeader className="flex justify-center">
-              <img src={groupchat} alt="Group Chat" className="w-32 h-24" />
+              <img src={groupchat} alt="Group Chat" className="w-30 h-24 mx-auto" />
             </CardHeader>
             <CardContent className="text-center">
               <CardTitle className="text-xl font-semibold text-purple-900">
