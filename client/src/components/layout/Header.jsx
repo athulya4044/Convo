@@ -22,7 +22,7 @@ const Header = () => {
               src={logoConvo}
               alt="Convo logo"
             />
-            Convo
+            CONVO
           </Link>
         </div>
 
