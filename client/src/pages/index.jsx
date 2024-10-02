@@ -1,8 +1,15 @@
 import { Button } from "@/components/ui/button";
-import { heroimage } from "@/assets/images";
+import { heroimage, ai, realtime, videocall, fileshare, groupchat } from "@/assets/images";
 import { useNavigate } from "react-router-dom";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
-const Test = () => {
+const Home = () => {
   const navigate = useNavigate();
 
   const goToAuth = () => navigate("/auth");
@@ -49,8 +56,82 @@ const Test = () => {
           that ignites real-time learning and fosters meaningful conversations.
         </p>
       </section>
+
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12 max-w-6xl mx-auto">
+        <Card className="bg-purple-200 max-w-xs mx-auto">
+          <CardHeader className="flex justify-center">
+            <img src={ai} alt="AI Help" className="w-32 h-24" />
+          </CardHeader>
+          <CardContent className="text-center">
+            <CardTitle className="text-xl font-semibold text-purple-900">
+              Get Instant AI Help Now by Google Gemini
+            </CardTitle>
+            <CardDescription className="mt-2 text-purple-900">
+              Need help while studying or working? Convo's integrated AI assistant is at your service !!!
+            </CardDescription>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-purple-200 max-w-xs mx-auto">
+          <CardHeader className="flex justify-center">
+            <img src={realtime} alt="Real Time Chat" className="w-32 h-24" />
+          </CardHeader>
+          <CardContent className="text-center text-purple-900">
+            <CardTitle className="text-xl font-semibold text-purple-900">
+              Start Your First Real-Time Chat
+            </CardTitle>
+            <CardDescription className="mt-2 text-purple-900">
+              Engage with peers and colleagues through fast, secure messaging. Brainstorm ideas, and work together in both public and private groups.
+            </CardDescription>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-purple-200 max-w-xs mx-auto">
+          <CardHeader className="flex justify-center">
+            <img src={videocall} alt="Virtual Meeting" className="w-32 h-24" />
+          </CardHeader>
+          <CardContent className="text-center">
+            <CardTitle className="text-xl font-semibold text-purple-900">
+              Host Your First Virtual Meeting (Coming Soon)
+            </CardTitle>
+            <CardDescription className="mt-2 text-purple-900">
+              Take collaboration to the next level with upcoming video conferencing features. Host virtual meetings, group study session without leaving the platform.
+            </CardDescription>
+          </CardContent>
+        </Card>
+
+        <div className="lg:col-span-3 flex justify-center mt-6 gap-6 lg:mt-0">
+          <Card className="bg-purple-200 max-w-xs mr-[30px]">
+            <CardHeader className="flex justify-center">
+              <img src={fileshare} alt="File Sharing" className="w-32 h-24" />
+            </CardHeader>
+            <CardContent className="text-center">
+              <CardTitle className="text-xl font-semibold text-purple-900">
+                Easy File Sharing
+              </CardTitle>
+              <CardDescription className="mt-2 text-purple-900">
+                No more back-and-forth emails. Upload and share documents, presentations, and media directly in your chat. All files are stored securely in the cloud, powered by AWS S3.
+              </CardDescription>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-purple-200 max-w-xs ml-[30px]">
+            <CardHeader className="flex justify-center">
+              <img src={groupchat} alt="Group Chat" className="w-32 h-24" />
+            </CardHeader>
+            <CardContent className="text-center">
+              <CardTitle className="text-xl font-semibold text-purple-900">
+                Group Chats & Private Messaging
+              </CardTitle>
+              <CardDescription className="mt-2 text-purple-900">
+                Collaborate in small groups or engage in one-on-one conversations. This feature gives you the flexibility you need.
+              </CardDescription>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
     </div>
   );
 };
 
-export default Test;
+export default Home;
