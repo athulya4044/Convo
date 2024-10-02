@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Button } from "../ui/button";
 import { Menu, X } from "lucide-react";
 import { logoConvo } from "../../assets/images";
 import { Link, useNavigate } from "react-router-dom";
+import { AppContext } from "@/utils/store/appContext";
 
 const Header = () => {
+  const { isLoggedIn, logout } = useContext(AppContext);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -35,10 +37,25 @@ const Header = () => {
             >
               Home
             </Link>
+            {isLoggedIn && (
+              <Link
+                className="border-transparent border-b-2 border-solid hover:border-primary hover:text-gray-900 ease-in-out duration-200"
+                to={"/dashboard"}
+              >
+                Dashboard
+              </Link>
+            )}
           </nav>
-          <Button className="hidden md:block" onClick={goToAuth}>
-            Get Started
-          </Button>
+          {!isLoggedIn && (
+            <Button className="hidden md:block" onClick={goToAuth}>
+              Get Started
+            </Button>
+          )}
+          {isLoggedIn && (
+            <Button className="hidden md:block" onClick={() => logout()}>
+              Logout
+            </Button>
+          )}
         </div>
 
         {/* mobile nav */}
@@ -67,7 +84,8 @@ const Header = () => {
           >
             Home
           </Link>
-          <Button onClick={goToAuth}>Get Started</Button>
+          {!isLoggedIn && <Button onClick={goToAuth}>Get Started</Button>}
+          {isLoggedIn && <Button onClick={() => logout()}>Logout</Button>}
         </nav>
       </div>
     </header>

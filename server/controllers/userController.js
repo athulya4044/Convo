@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import bcrypt from "bcrypt";
+import { sendPasswordResetEmail } from "../utilities/sendEmail.js";
 
 // Register a new user
 export const registerUser = async (req, res) => {
@@ -76,7 +77,7 @@ export const getUserById = async (req, res) => {
 };
 
 // get user by email
-export const getUserByEmail = async (req, res) => {
+export const getUserByEmailAndSendEmail = async (req, res) => {
   try {
     const { email } = req.params;
     const user = await User.findOne({ email });
@@ -84,11 +85,41 @@ export const getUserByEmail = async (req, res) => {
       return res.status(200).json({
         error: "User not found with the associated email. Please try again",
       });
-    console.log(user);
+    // trigger an email
+    await sendPasswordResetEmail({
+      email: user.email,
+      token: user._id,
+      userName: user.name,
+    });
     res.status(200).json({
       message:
         "We've sent you an email with instructions to reset your password.",
     });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// reset user password
+export const resetUserPassword = async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    const user = await User.findByIdAndUpdate(token, {
+      $set: {
+        password_hash: hashedPassword,
+      },
+    });
+    if (!user) {
+      return res
+        .status(200)
+        .json({ error: "Invalid User. Check the URL and try again" });
+    }
+    console.log("passwords changed");
+    return res.status(200).json({ message: "Password updated successfully !" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
