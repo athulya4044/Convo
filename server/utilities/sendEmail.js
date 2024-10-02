@@ -1,14 +1,17 @@
-const nodemailer = require("nodemailer");
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const transporter = nodemailer.createTransport({
-  host: "gmail",
+  service: "gmail",
   auth: {
     user: process.env.NODEMAILER_EMAIL,
     pass: process.env.NODEMAILER_PASS,
   },
 });
 
-export async function sendPasswordResetEmail(email, token, userName) {
+export async function sendPasswordResetEmail({ email, token, userName }) {
   try {
     // Create reset link
     const resetLink = `http://localhost:5173/reset-password?token=${token}`;
@@ -52,19 +55,34 @@ export async function sendPasswordResetEmail(email, token, userName) {
     `;
 
     // Send email
-    await transporter.sendMail({
+    const info = await transporter.sendMail({
       from: '"Convo Support" <support@convo.com>',
       to: email,
       subject: "Password Reset Request",
       html: htmlEmail,
     });
 
+    console.log("Message sent: %s", info.messageId);
     return {
       success: true,
       message: "Password reset email sent successfully.",
+      messageId: info.messageId,
     };
   } catch (error) {
     console.error("Error sending password reset email:", error);
-    return { error: "An error occurred while processing your request." };
+    return {
+      error: "An error occurred while processing your request.",
+      details: error.message,
+      code: error.code,
+    };
   }
 }
+
+// Test the connection
+transporter.verify(function (error, success) {
+  if (error) {
+    console.log("SMTP connection error:", error);
+  } else {
+    console.log("SMTP connection is ready to take our messages");
+  }
+});

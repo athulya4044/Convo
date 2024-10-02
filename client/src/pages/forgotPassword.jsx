@@ -27,7 +27,7 @@ export default function ForgotPassword() {
     setLoading(true);
     setError("");
     try {
-      let res = await axios.post(
+      let res = await axios.get(
         `http://localhost:4000/api/users/forgot-password/${email}`
       );
       // error handling
