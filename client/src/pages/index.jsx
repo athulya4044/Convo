@@ -67,7 +67,7 @@ const Home = () => {
               Get Instant AI Help Now by Google Gemini
             </CardTitle>
             <CardDescription className="mt-2 text-purple-900">
-              Need help while studying or working? Convo's integrated AI assistant is at your service !!!
+              Need help while studying or working? Convo&apso;s integrated AI assistant is at your service !!!
             </CardDescription>
           </CardContent>
         </Card>
