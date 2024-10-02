@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { heroimage, ai, realtime, videocall, fileshare, groupchat } from "@/assets/images";
+import { heroimage, ai, realtime, videocall, fileshare, groupchat,sign,create,startcolab} from "@/assets/images";
 import { useNavigate } from "react-router-dom";
 import {
   Card,
@@ -102,7 +102,7 @@ const Home = () => {
 
         <Card className="bg-purple-200 max-w-xs">
           <CardHeader className="flex justify-center">
-            <img src={fileshare} alt="File Sharing" className="w-32 h-26" />
+            <img src={fileshare} alt="File Sharing" className="w-30 h-24 mx-auto" />
           </CardHeader>
           <CardContent className="text-center">
             <CardTitle className="text-xl font-semibold text-purple-900">
@@ -128,6 +128,73 @@ const Home = () => {
           </CardContent>
         </Card>
       </section>
+
+    {/* How It Works Section */}
+<section className="text-center my-16">
+  <h2 className="text-3xl md:text-4xl font-bold text-purple-900 mb-12">How it works?</h2>
+
+  {/* Flex container for the ellipses and steps */}
+  <div className="max-w-6xl mx-auto">
+
+    {/* Flex container for Step 1 and Step 3 */}
+    <div className="flex justify-between mb-8">
+      {/* Step 1 */}
+      <div
+        className="relative flex items-center bg-purple-800 text-white p-8 rounded-[50%]"
+        style={{ width: '520px', height: '260px' }}
+      >
+        <img src={sign} alt="Sign Up" className="w-24 h-24 mr-6" />
+        <div className="flex flex-col text-left">
+          <h3 className="text-lg font-bold mb-2">1. Sign Up</h3>
+          <p className="text-sm">Get started by creating an account. It's free and quick!</p>
+        </div>
+      </div>
+
+      {/* Step 3 */}
+      <div
+        className="relative flex items-center bg-purple-800 text-white p-8 rounded-[50%]"
+        style={{ width: '520px', height: '260px' }}
+      >
+        <img src={startcolab} alt="Start Collaborating" className="w-24 h-24 mr-6" />
+        <div className="flex flex-col text-left">
+          <h3 className="text-lg font-bold mb-2">3. Start Collaborating</h3>
+          <p className="text-sm">Chat in real-time, upload files, get AI-powered assistance, and work with your peers.</p>
+        </div>
+      </div>
+    </div>
+
+    {/* Step 2 centered below Steps 1 and 3 */}
+    <div
+      className="relative flex items-center bg-purple-800 text-white p-8 rounded-[50%] mx-auto mb-8"
+      style={{ width: '500px', height: '260px' }}
+    >
+      <img src={create} alt="Create or Join Groups" className="w-24 h-24 mr-6" />
+      <div className="flex flex-col text-left">
+        <h3 className="text-lg font-bold mb-2">2. Create or Join Groups</h3>
+        <p className="text-sm">Join a public group or create your private group for focused discussions.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section className="w-full text-center mt-8">
+  <p
+    className="text-lg md:text-3xl font-semibold text-purple-900 max-w-4xl mx-auto uppercase"
+    style={{ lineHeight: "1.5" }}
+  >
+   Scrolling can wait. Let’s chat and share ideas!
+  </p>
+  <div className="mb-8"></div>
+  <div className="mt-4 flex justify-center">
+    <Button className="md:block font-semibold" onClick={goToAuth}>
+      Get Started
+    </Button>
+  </div>
+  <div className="mb-8"></div>
+</section>
+
+
     </div>
   );
 };
