@@ -100,8 +100,7 @@ const Home = () => {
           </CardContent>
         </Card>
 
-        <div className="lg:col-span-3 flex justify-center gap-6">
-          <Card className="bg-purple-200 max-w-xs">
+          <Card className="bg-purple-200 max-w-xs mx-auto">
             <CardHeader className="flex justify-center">
               <img src={fileshare} alt="File Sharing" className="w-30 h-24 mx-auto" />
             </CardHeader>
@@ -115,7 +114,7 @@ const Home = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-purple-200 max-w-xs">
+          <Card className="bg-purple-200 max-w-xs mx-auto">
             <CardHeader className="flex justify-center">
               <img src={groupchat} alt="Group Chat" className="w-30 h-24 mx-auto" />
             </CardHeader>
@@ -128,7 +127,6 @@ const Home = () => {
               </CardDescription>
             </CardContent>
           </Card>
-        </div>
       </section>
     </div>
   );
