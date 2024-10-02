@@ -57,8 +57,8 @@ const Home = () => {
         </p>
       </section>
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12 max-w-6xl mx-auto place-items-center">
-        <Card className="bg-purple-200 max-w-xs mx-auto">
+      <section className="flex flex-wrap justify-center gap-12 mt-12 max-w-6xl mx-auto">
+        <Card className="bg-purple-200 max-w-xs">
           <CardHeader className="flex justify-center">
             <img src={ai} alt="AI Help" className="w-30 h-24 mx-auto" />
           </CardHeader>
@@ -72,7 +72,7 @@ const Home = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-purple-200 max-w-xs mx-auto">
+        <Card className="bg-purple-200 max-w-xs">
           <CardHeader className="flex justify-center">
             <img src={realtime} alt="Real Time Chat" className="w-30 h-24 mx-auto" />
           </CardHeader>
@@ -86,7 +86,7 @@ const Home = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-purple-200 max-w-xs mx-auto">
+        <Card className="bg-purple-200 max-w-xs">
           <CardHeader className="flex justify-center">
             <img src={videocall} alt="Virtual Meeting" className="w-30 h-24 mx-auto" />
           </CardHeader>
@@ -100,33 +100,33 @@ const Home = () => {
           </CardContent>
         </Card>
 
-          <Card className="bg-purple-200 max-w-xs mx-auto">
-            <CardHeader className="flex justify-center">
-              <img src={fileshare} alt="File Sharing" className="w-30 h-24 mx-auto" />
-            </CardHeader>
-            <CardContent className="text-center">
-              <CardTitle className="text-xl font-semibold text-purple-900">
-                Easy File Sharing
-              </CardTitle>
-              <CardDescription className="mt-2 text-purple-900">
-                No more back-and-forth emails. Upload and share documents, presentations, and media directly in your chat. All files are stored securely in the cloud, powered by AWS S3.
-              </CardDescription>
-            </CardContent>
-          </Card>
+        <Card className="bg-purple-200 max-w-xs">
+          <CardHeader className="flex justify-center">
+            <img src={fileshare} alt="File Sharing" className="w-32 h-26" />
+          </CardHeader>
+          <CardContent className="text-center">
+            <CardTitle className="text-xl font-semibold text-purple-900">
+              Easy File Sharing
+            </CardTitle>
+            <CardDescription className="mt-2 text-purple-900">
+              No more back-and-forth emails. Upload and share documents, presentations, and media directly in your chat. All files are stored securely in the cloud, powered by AWS S3.
+            </CardDescription>
+          </CardContent>
+        </Card>
 
-          <Card className="bg-purple-200 max-w-xs mx-auto">
-            <CardHeader className="flex justify-center">
-              <img src={groupchat} alt="Group Chat" className="w-30 h-24 mx-auto" />
-            </CardHeader>
-            <CardContent className="text-center">
-              <CardTitle className="text-xl font-semibold text-purple-900">
-                Group Chats & Private Messaging
-              </CardTitle>
-              <CardDescription className="mt-2 text-purple-900">
-                Collaborate in small groups or engage in one-on-one conversations. This feature gives you the flexibility you need.
-              </CardDescription>
-            </CardContent>
-          </Card>
+        <Card className="bg-purple-200 max-w-xs ">
+          <CardHeader className="flex justify-center">
+            <img src={groupchat} alt="Group Chat" className="w-30 h-24 mx-auto" />
+          </CardHeader>
+          <CardContent className="text-center">
+            <CardTitle className="text-xl font-semibold text-purple-900">
+              Group Chats & Private Messaging
+            </CardTitle>
+            <CardDescription className="mt-2 text-purple-900">
+              Collaborate in small groups or engage in one-on-one conversations. This feature gives you the flexibility you need.
+            </CardDescription>
+          </CardContent>
+        </Card>
       </section>
     </div>
   );
