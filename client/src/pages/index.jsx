@@ -102,7 +102,7 @@ const Home = () => {
 
         <Card className="bg-purple-200 max-w-xs">
           <CardHeader className="flex justify-center">
-            <img src={fileshare} alt="File Sharing" className="w-32 h-26" />
+            <img src={fileshare} alt="File Sharing" className="w-32 h-26 mx-auto" />
           </CardHeader>
           <CardContent className="text-center">
             <CardTitle className="text-xl font-semibold text-purple-900">
@@ -128,7 +128,74 @@ const Home = () => {
           </CardContent>
         </Card>
       </section>
+{/* How It Works Section */}
+<section className="text-center my-16 relative">
+  <h2 className="text-3xl md:text-4xl font-bold text-purple-900 mb-12">How it works?</h2>
+
+  {/* SVG for Arrows with Arrowhead Tips */}
+  <svg height="300" width="100%" className="absolute top-0 left-0">
+    {/* Arrow from Step 1 to Step 2 */}
+    <line x1="10%" y1="120" x2="50%" y2="360" stroke="purple" stroke-width="2" marker-end="url(#arrowhead)"></line>
+
+{/* Arrow from Step 2 to Step 3 */}
+<line x1="60%" y1="180" x2="50%" y2="350" stroke="purple" strokeWidth="2" markerEnd="url(#arrowhead)" />
+    
+    {/* Define the arrowhead marker */}
+    <defs>
+      <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+              refX="0" refY="3.5" orient="auto" markerUnits="strokeWidth">
+        <path d="M0,0 L0,7 L10,3.5 z" fill="purple" />
+      </marker>
+    </defs>
+  </svg>
+
+  {/* Flex container for the ellipses and steps */}
+  <div className="max-w-6xl mx-auto relative">
+
+    {/* Flex container for Step 1 and Step 3 */}
+    <div className="flex justify-between mb-8">
+      {/* Step 1 */}
+      <div
+        className="relative flex items-center bg-purple-800 text-white p-8 rounded-[50%]"
+        style={{ width: '520px', height: '260px' }}
+      >
+        <img src={ai} alt="Sign Up" className="w-24 h-24 mr-6" />
+        <div className="flex flex-col text-left">
+          <h3 className="text-lg font-bold mb-2">1. Sign Up</h3>
+          <p className="text-sm">Get started by creating an account. It's free and quick!</p>
+        </div>
+      </div>
+
+      {/* Step 3 */}
+      <div
+        className="relative flex items-center bg-purple-800 text-white p-8 rounded-[50%]"
+        style={{ width: '520px', height: '260px' }}
+      >
+        <img src={ai} alt="Start Collaborating" className="w-24 h-24 mr-6" />
+        <div className="flex flex-col text-left">
+          <h3 className="text-lg font-bold mb-2">3. Start Collaborating</h3>
+          <p className="text-sm">Chat in real-time, upload files, get AI-powered assistance, and work with your peers.</p>
+        </div>
+      </div>
     </div>
+
+    {/* Step 2 centered below Steps 1 and 3 */}
+    <div
+      className="relative flex items-center bg-purple-800 text-white p-8 rounded-[50%] mx-auto mb-8"
+      style={{ width: '500px', height: '260px' }}
+    >
+      <img src={ai} alt="Create or Join Groups" className="w-24 h-24 mr-6" />
+      <div className="flex flex-col text-left">
+        <h3 className="text-lg font-bold mb-2">2. Create or Join Groups</h3>
+        <p className="text-sm">Join a public group or create your private group for focused discussions.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+    </div>
+    
   );
 };
 
