@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import userRoutes from "./routes/userRoutes.js";
+import chatRoutes from "./routes/chatRoutes.js";
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ mongoose
   .catch((err) => console.log("Database connection error: ", err.message));
 
 app.use("/api/users", userRoutes);
+app.use("/api/chats", chatRoutes);
 
 // routes
 app.get("/", (req, res) => {

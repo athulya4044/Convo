@@ -76,7 +76,7 @@ export const getUserById = async (req, res) => {
   }
 };
 
-// get user by email
+// Get user by email
 export const getUserByEmailAndSendEmail = async (req, res) => {
   try {
     const { email } = req.params;
@@ -85,7 +85,6 @@ export const getUserByEmailAndSendEmail = async (req, res) => {
       return res.status(200).json({
         error: "User not found with the associated email. Please try again",
       });
-    // trigger an email
     await sendPasswordResetEmail({
       email: user.email,
       token: user._id,
@@ -100,7 +99,7 @@ export const getUserByEmailAndSendEmail = async (req, res) => {
   }
 };
 
-// reset user password
+// Reset user password
 export const resetUserPassword = async (req, res) => {
   try {
     const { token, password } = req.body;
@@ -120,6 +119,25 @@ export const resetUserPassword = async (req, res) => {
     }
     console.log("passwords changed");
     return res.status(200).json({ message: "Password updated successfully !" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Search for users and groups based on query
+export const searchUsersAndGroups = async (req, res) => {
+  const { query } = req.query;
+
+  try {
+    const users = await User.find({
+      name: { $regex: query, $options: "i" }
+    });
+
+    const groups = await Chat.find({
+      chat_name: { $regex: query, $options: "i" }
+    });
+    
+    res.status(200).json({ users, groups });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

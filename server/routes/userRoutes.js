@@ -6,6 +6,7 @@ import {
   getUserById,
   getUserByEmailAndSendEmail,
   resetUserPassword,
+  searchUsersAndGroups
 } from "../controllers/userController.js";
 
 const router = express.Router();
@@ -27,5 +28,8 @@ router.post("/reset-password", resetUserPassword);
 
 // Get all users
 router.get("/", getAllUsers);
+
+// Search route for users and groups
+router.get("/search", searchUsersAndGroups);
 
 export default router;
