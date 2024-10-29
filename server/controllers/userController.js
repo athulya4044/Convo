@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import Chat from "../models/Chat.js";
 import bcrypt from "bcrypt";
 import { sendPasswordResetEmail } from "../utilities/sendEmail.js";
 
@@ -137,7 +138,11 @@ export const searchUsersAndGroups = async (req, res) => {
       chat_name: { $regex: query, $options: "i" }
     });
     
-    res.status(200).json({ users, groups });
+    res.status(200).json({
+      users: users.length ? users : "No users found",
+      groups: groups.length ? groups : "No groups found"
+    });
+    
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
