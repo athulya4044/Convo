@@ -21,7 +21,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
-export default function SidebarMenu({ onCreateChat, client, userId }) {
+export default function SidebarMenu({ onCreateChat, client, userId, logout }) {
   const [isAccountInfoOpen, setIsAccountInfoOpen] = useState(false);
 
   return (
@@ -72,7 +72,7 @@ export default function SidebarMenu({ onCreateChat, client, userId }) {
               <User className="mr-2 h-4 w-4" />
               Account Info
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => client.disconnectUser()}>
+            <DropdownMenuItem onClick={logout}>
               <LogOut className="mr-2 h-4 w-4" />
               Logout
             </DropdownMenuItem>

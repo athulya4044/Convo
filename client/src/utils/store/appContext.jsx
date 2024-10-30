@@ -1,10 +1,11 @@
+/* eslint-disable react/prop-types */
 import React, { useState } from "react";
 
 export const AppContext = React.createContext({
   email: "",
   streamToken: "",
   isLoggedIn: false,
-  loginHandler: (loginObj) => {},
+  loginHandler: () => {},
   logoutHandler: () => {},
 });
 
@@ -37,10 +38,11 @@ function AppContextProvider({ children }) {
     localStorage.setItem("loginConfig", JSON.stringify(newLoginConfig));
   }
 
-  function logoutHandler() {
+  function logoutHandler(client) {
     if (isLoggedIn) {
       const response = window.confirm("Are you sure you want to LOGOUT ?");
       if (response) {
+        client.disconnectUser();
         setEmail(null);
         setStreamToken(null);
         localStorage.removeItem("loginConfig");

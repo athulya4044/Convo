@@ -52,6 +52,7 @@ export default function Dashboard() {
             onCreateChat={() => setIsCreateChatOpen(true)}
             client={client}
             userId={userId}
+            logout={() => _ctx.logout(client)}
           />
           <div className="my-3 flex-1 flex flex-col">
             <Channel>
