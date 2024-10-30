@@ -6,13 +6,13 @@ import { sendPasswordResetEmail } from "../utilities/sendEmail.js";
 import { StreamChat } from "stream-chat";
 import stripSpecialCharacters from "../utilities/stripSpecialCharacters.js";
 
-// init twilio
+// Init twilio
 const twilioClient = new twilio(
   process.env.TWILIO_ACCOUNT_SID,
   process.env.TWILIO_AUTH_TOKEN
 );
 
-// init stream chat
+// Init stream chat
 const streamApiKey = process.env.STREAM_API_KEY;
 const streamApiSecret = process.env.STREAM_API_SECRET;
 const streamServerClient = StreamChat.getInstance(
@@ -72,7 +72,7 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ error: "Invalid email or password" });
     }
 
-    // generate stream token
+    // Generate stream token
     const userId = stripSpecialCharacters(email);
     const token = streamServerClient.createToken(userId);
 
@@ -117,7 +117,7 @@ export const getUserById = async (req, res) => {
   }
 };
 
-// get user by email
+// Get user by email
 export const getUserByEmailAndSendEmail = async (req, res) => {
   try {
     const { email } = req.params;
@@ -160,6 +160,26 @@ export const resetUserPassword = async (req, res) => {
     }
     console.log("passwords changed");
     return res.status(200).json({ message: "Password updated successfully !" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Search for users and groups based on query
+export const searchUsersAndGroups = async (req, res) => {
+  const { query } = req.query;
+  try {
+    const users = await User.find({
+      name: { $regex: query, $options: "i" }
+    });
+    const groups = await Chat.find({
+      chat_name: { $regex: query, $options: "i" }
+    });
+    
+    res.status(200).json({
+      users: users.length ? users : "No users found",
+      groups: groups.length ? groups : "No groups found"
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
