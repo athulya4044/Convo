@@ -18,7 +18,7 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
 export default function ResetPassword() {
@@ -32,8 +32,7 @@ export default function ResetPassword() {
   const [updatePassword, setUpdatePassword] = useState(false);
 
   const navigate = useNavigate();
-  const location = useLocation();
-  const token = new URLSearchParams(location.search).get("token");
+  const { token } = useParams("token");
 
   const handleSubmit = async (e) => {
     e.preventDefault();

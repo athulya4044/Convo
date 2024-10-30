@@ -31,18 +31,28 @@ const Header = () => {
         {/* desktop nav */}
         <div className="md:flex items-center justify-between gap-10">
           <nav className="hidden md:flex gap-10 text-primary">
-            <Link
-              to={"/"}
-              className="border-transparent border-b-2 border-solid hover:border-primary hover:text-gray-900 ease-in-out duration-200"
-            >
-              Home
-            </Link>
+            {!isLoggedIn && (
+              <Link
+                to={"/"}
+                className="border-transparent border-b-2 border-solid hover:border-primary hover:text-gray-900 ease-in-out duration-200"
+              >
+                Home
+              </Link>
+            )}
             {isLoggedIn && (
               <Link
                 className="border-transparent border-b-2 border-solid hover:border-primary hover:text-gray-900 ease-in-out duration-200"
                 to={"/dashboard"}
               >
                 Dashboard
+              </Link>
+            )}
+            {isLoggedIn && (
+              <Link
+                className="border-transparent border-b-2 border-solid hover:border-primary hover:text-gray-900 ease-in-out duration-200"
+                to={"/"}
+              >
+                Chats
               </Link>
             )}
           </nav>
@@ -85,6 +95,22 @@ const Header = () => {
             Home
           </Link>
           {!isLoggedIn && <Button onClick={goToAuth}>Get Started</Button>}
+          {isLoggedIn && (
+            <Link
+              className="border-transparent border-b-2 border-solid hover:border-primary hover:text-gray-900 ease-in-out duration-200"
+              to={"/dashboard"}
+            >
+              Dashboard
+            </Link>
+          )}
+          {isLoggedIn && (
+            <Link
+              className="border-transparent border-b-2 border-solid hover:border-primary hover:text-gray-900 ease-in-out duration-200"
+              to={"/"}
+            >
+              Chats
+            </Link>
+          )}
           {isLoggedIn && <Button onClick={() => logout()}>Logout</Button>}
         </nav>
       </div>

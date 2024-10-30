@@ -6,7 +6,8 @@ import {
   getUserById,
   getUserByEmailAndSendEmail,
   resetUserPassword,
-  searchUsersAndGroups
+  sendUserOTP,
+  verifyUserOTP,
 } from "../controllers/userController.js";
 
 const router = express.Router();
@@ -17,9 +18,6 @@ router.post("/register", registerUser);
 // User login
 router.post("/login", loginUser);
 
-// Search route for users and groups
-router.get("/search", searchUsersAndGroups);
-
 // Get a user by ID
 router.get("/:id", getUserById);
 
@@ -29,9 +27,13 @@ router.get("/forgot-password/:email", getUserByEmailAndSendEmail);
 // Reset user password
 router.post("/reset-password", resetUserPassword);
 
+// Send user OTP
+router.post("/send-otp", sendUserOTP);
+
+// Verify user OTP
+router.post("/verify-otp", verifyUserOTP);
+
 // Get all users
 router.get("/", getAllUsers);
-
-
 
 export default router;
