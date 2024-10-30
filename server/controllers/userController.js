@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import Chat from "../models/Chat.js";
 import bcrypt from "bcrypt";
 import twilio from "twilio";
 import { sendPasswordResetEmail } from "../utilities/sendEmail.js";
@@ -116,7 +117,7 @@ export const getUserById = async (req, res) => {
   }
 };
 
-// send forget password email
+// get user by email
 export const getUserByEmailAndSendEmail = async (req, res) => {
   try {
     const { email } = req.params;
@@ -125,7 +126,6 @@ export const getUserByEmailAndSendEmail = async (req, res) => {
       return res.status(200).json({
         error: "User not found with the associated email. Please try again",
       });
-    // trigger an email
     await sendPasswordResetEmail({
       email: user.email,
       token: user._id,
@@ -140,7 +140,7 @@ export const getUserByEmailAndSendEmail = async (req, res) => {
   }
 };
 
-// reset user password
+// Reset user password
 export const resetUserPassword = async (req, res) => {
   try {
     const { token, password } = req.body;
@@ -162,80 +162,5 @@ export const resetUserPassword = async (req, res) => {
     return res.status(200).json({ message: "Password updated successfully !" });
   } catch (error) {
     res.status(500).json({ error: error.message });
-  }
-};
-
-// Send OTP for forget password
-export const sendUserOTP = async (req, res) => {
-  try {
-    const { phoneNumber } = req.body;
-
-    // Check if phone number is registered
-    const user = await User.findOne({ phoneNumber });
-
-    if (!user) {
-      return res.status(200).json({
-        error:
-          "User not found with the associated phone number. Please try again",
-      });
-    }
-
-    // Send OTP via Twilio Verify Service
-    await twilioClient.verify.v2
-      .services(process.env.TWILIO_MSG_SERVICE_ID)
-      .verifications.create({
-        to: phoneNumber,
-        channel: "sms",
-      })
-      .then((verification) => {
-        console.log(
-          `OTP request sent to ${phoneNumber}. Status: ${verification.status}`
-        );
-      });
-
-    return res
-      .status(200)
-      .json({ success: true, message: "OTP sent successfully!" });
-  } catch (error) {
-    console.log(error);
-    return res
-      .status(500)
-      .json({ error: "Error sending OTP. Please try again." });
-  }
-};
-
-export const verifyUserOTP = async (req, res) => {
-  try {
-    const { phoneNumber, code } = req.body;
-
-    const user = await User.findOne({ phoneNumber });
-
-    // Verify the OTP using Twilio Verify Service
-    const verificationCheck = await twilioClient.verify.v2
-      .services(process.env.TWILIO_MSG_SERVICE_ID)
-      .verificationChecks.create({
-        to: phoneNumber,
-        code: code,
-      });
-
-    if (verificationCheck.status === "approved") {
-      console.log(
-        `OTP request sent to ${phoneNumber}. Status: ${verificationCheck.status}`
-      );
-      return res.status(200).json({
-        success: true,
-        message: "OTP verified successfully!",
-        userID: user._id,
-      });
-    } else {
-      return res
-        .status(200)
-        .json({ success: false, error: "Invalid or expired OTP." });
-    }
-  } catch (error) {
-    console.log(error);
-    return res
-      .status(200)
-      .json({ error: "Error verifying OTP. Please try again." });
   }
 };

@@ -17,6 +17,13 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  phone_number: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    match: [/^\+?[1-9]\d{1,14}$/, "Please enter a valid phone number"], // E.164 format
+  },
   image_url: {
     type: String,
     default: null, 
