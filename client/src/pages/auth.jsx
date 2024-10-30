@@ -21,10 +21,12 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
+import { isValidPhoneNumber } from "react-phone-number-input";
 import { auth } from "@/assets/images";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { AppContext } from "@/utils/store/appContext";
+import { PhoneInput } from "@/components/ui/phone-input";
 
 function Auth() {
   // converting on form state obj to simplify state management
@@ -32,6 +34,7 @@ function Auth() {
     email: "",
     password: "",
     name: "",
+    phoneNumber: "",
     confirmPassword: "",
   });
   const [error, setError] = useState("");
@@ -55,6 +58,7 @@ function Auth() {
     setFormState({
       email: "",
       password: "",
+      phoneNumber: "",
       name: "",
       confirmPassword: "",
     });
@@ -76,14 +80,18 @@ function Auth() {
     setError("");
 
     try {
-      await axios.post("http://localhost:4000/api/users/login", {
-        email: formState.email,
-        password: formState.password,
-      });
+      const response = await axios.post(
+        "http://localhost:4000/api/users/login",
+        {
+          email: formState.email,
+          password: formState.password,
+        }
+      );
 
       // go to dashboard
-      login({
+      await login({
         email: formState.email,
+        streamToken: response.data.streamToken,
       });
       navigate("/dashboard");
     } catch (err) {
@@ -99,6 +107,12 @@ function Auth() {
     setLoading(true);
     setError("");
 
+    if (!isValidPhoneNumber(formState.phoneNumber)) {
+      setError("Invalid phone number. Please enter a valid phone number.");
+      setLoading(false);
+      return;
+    }
+
     if (formState.password !== formState.confirmPassword) {
       setError("Passwords do not match !");
       setLoading(false);
@@ -110,6 +124,7 @@ function Auth() {
         name: formState.name,
         email: formState.email,
         password: formState.password,
+        phoneNumber: formState.phoneNumber,
       });
 
       // same email signup error handling
@@ -251,6 +266,19 @@ function Auth() {
                       placeholder="John Doe"
                       value={formState.name}
                       onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phoneNumber">Phone Number</Label>
+                    {/* sets state differently as using react-phone-number pkg */}
+                    <PhoneInput
+                      id="phoneNumber"
+                      placeholder="+X XXX-XXX-XXXX"
+                      value={formState.phoneNumber}
+                      onChange={(value) =>
+                        setFormState({ ...formState, phoneNumber: value })
+                      }
                       required
                     />
                   </div>

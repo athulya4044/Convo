@@ -1,34 +1,56 @@
 import User from "../models/User.js";
 import bcrypt from "bcrypt";
+import twilio from "twilio";
 import { sendPasswordResetEmail } from "../utilities/sendEmail.js";
+import { StreamChat } from "stream-chat";
+import stripSpecialCharacters from "../utilities/stripSpecialCharacters.js";
+
+// init twilio
+const twilioClient = new twilio(
+  process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTH_TOKEN
+);
+
+// init stream chat
+const streamApiKey = process.env.STREAM_API_KEY;
+const streamApiSecret = process.env.STREAM_API_SECRET;
+const streamServerClient = StreamChat.getInstance(
+  streamApiKey,
+  streamApiSecret
+);
 
 // Register a new user
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, phoneNumber, password } = req.body;
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({
+      $or: [{ email }, { phoneNumber }],
+    });
+
     if (existingUser) {
       return res.status(200).json({
-        error: "User already exists. Please try with a different email",
+        error:
+          "User already exists. Please try with a different email / phone number",
+      });
+    } else {
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      const newUser = new User({
+        name,
+        email,
+        password_hash: hashedPassword,
+        phoneNumber,
+      });
+
+      await newUser.save();
+
+      return res.status(201).json({
+        message: "User registered successfully. Please Login to continue",
+        user: newUser,
       });
     }
-
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-    const newUser = new User({
-      name,
-      email,
-      password_hash: hashedPassword,
-    });
-
-    await newUser.save();
-
-    res.status(201).json({
-      message: "User registered successfully. Please Login to continue",
-      user: newUser,
-    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -49,7 +71,25 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ error: "Invalid email or password" });
     }
 
-    res.status(200).json({ message: "Login successful", user });
+    // generate stream token
+    const userId = stripSpecialCharacters(email);
+    const token = streamServerClient.createToken(userId);
+
+    // Prepare user details for Stream Chat
+    const userDetails = {
+      id: userId,
+      email: user.email,
+      name: user.name,
+      image_url: user.image_url,
+      phoneNumber: user.phoneNumber,
+    };
+
+    // Upsert user details in Stream Chat
+    await streamServerClient.upsertUser(userDetails);
+
+    res
+      .status(200)
+      .json({ message: "Login successful", user, streamToken: token });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -76,7 +116,7 @@ export const getUserById = async (req, res) => {
   }
 };
 
-// get user by email
+// send forget password email
 export const getUserByEmailAndSendEmail = async (req, res) => {
   try {
     const { email } = req.params;
@@ -122,5 +162,80 @@ export const resetUserPassword = async (req, res) => {
     return res.status(200).json({ message: "Password updated successfully !" });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+// Send OTP for forget password
+export const sendUserOTP = async (req, res) => {
+  try {
+    const { phoneNumber } = req.body;
+
+    // Check if phone number is registered
+    const user = await User.findOne({ phoneNumber });
+
+    if (!user) {
+      return res.status(200).json({
+        error:
+          "User not found with the associated phone number. Please try again",
+      });
+    }
+
+    // Send OTP via Twilio Verify Service
+    await twilioClient.verify.v2
+      .services(process.env.TWILIO_MSG_SERVICE_ID)
+      .verifications.create({
+        to: phoneNumber,
+        channel: "sms",
+      })
+      .then((verification) => {
+        console.log(
+          `OTP request sent to ${phoneNumber}. Status: ${verification.status}`
+        );
+      });
+
+    return res
+      .status(200)
+      .json({ success: true, message: "OTP sent successfully!" });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ error: "Error sending OTP. Please try again." });
+  }
+};
+
+export const verifyUserOTP = async (req, res) => {
+  try {
+    const { phoneNumber, code } = req.body;
+
+    const user = await User.findOne({ phoneNumber });
+
+    // Verify the OTP using Twilio Verify Service
+    const verificationCheck = await twilioClient.verify.v2
+      .services(process.env.TWILIO_MSG_SERVICE_ID)
+      .verificationChecks.create({
+        to: phoneNumber,
+        code: code,
+      });
+
+    if (verificationCheck.status === "approved") {
+      console.log(
+        `OTP request sent to ${phoneNumber}. Status: ${verificationCheck.status}`
+      );
+      return res.status(200).json({
+        success: true,
+        message: "OTP verified successfully!",
+        userID: user._id,
+      });
+    } else {
+      return res
+        .status(200)
+        .json({ success: false, error: "Invalid or expired OTP." });
+    }
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(200)
+      .json({ error: "Error verifying OTP. Please try again." });
   }
 };

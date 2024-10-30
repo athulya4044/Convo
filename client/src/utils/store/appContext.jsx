@@ -2,6 +2,7 @@ import React, { useState } from "react";
 
 export const AppContext = React.createContext({
   email: "",
+  streamToken: "",
   isLoggedIn: false,
   loginHandler: (loginObj) => {},
   logoutHandler: () => {},
@@ -10,24 +11,28 @@ export const AppContext = React.createContext({
 function getDataFromLocalStorage() {
   const data = localStorage.getItem("loginConfig");
   if (data) {
-    const { email } = JSON.parse(data);
-    return { email };
+    const { email, streamToken } = JSON.parse(data);
+    return { email, streamToken };
   } else {
-    return { email: null };
+    return { email: null, streamToken: null };
   }
 }
 
 function AppContextProvider({ children }) {
-  const { email: emailFromLS } = getDataFromLocalStorage();
+  const { email: emailFromLS, streamToken: streamTokenFromLS } =
+    getDataFromLocalStorage();
   const [email, setEmail] = useState(emailFromLS);
+  const [streamToken, setStreamToken] = useState(streamTokenFromLS);
 
-  const isLoggedIn = !!email;
+  const isLoggedIn = !!email && !!streamToken;
 
   function loginHandler(loginConfig) {
-    const { email } = loginConfig;
+    const { email, streamToken } = loginConfig;
     setEmail(email);
+    setStreamToken(streamToken);
     const newLoginConfig = {
       email,
+      streamToken,
     };
     localStorage.setItem("loginConfig", JSON.stringify(newLoginConfig));
   }
@@ -37,6 +42,7 @@ function AppContextProvider({ children }) {
       const response = window.confirm("Are you sure you want to LOGOUT ?");
       if (response) {
         setEmail(null);
+        setStreamToken(null);
         localStorage.removeItem("loginConfig");
       }
     }
@@ -44,6 +50,7 @@ function AppContextProvider({ children }) {
 
   const contextValue = {
     email,
+    streamToken,
     isLoggedIn: isLoggedIn,
     login: loginHandler,
     logout: logoutHandler,
