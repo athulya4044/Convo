@@ -239,3 +239,45 @@ export const verifyUserOTP = async (req, res) => {
       .json({ error: "Error verifying OTP. Please try again." });
   }
 };
+
+export const updateUser = async (req, res) => {
+  try {
+    const { email, name, image_url, phoneNumber } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(200).json({
+        error: "User not found. Please try again",
+      });
+    }
+
+    await User.findByIdAndUpdate(user._id, {
+      $set: {
+        name,
+        image_url,
+        phoneNumber,
+      },
+    });
+
+    // generate stream token
+    const userId = stripSpecialCharacters(email);
+
+    // Prepare updated user details for Stream Chat
+    const userDetails = {
+      id: userId,
+      name,
+      email,
+      image_url,
+      phoneNumber,
+    };
+
+    // Upsert user details in Stream Chat
+    await streamServerClient.upsertUser(userDetails);
+
+    return res.status(200).json({ message: "User updated successfully" });
+  } catch (error) {
+    console.log(error);
+    return res.status(200).json({ error: "Error updating user" });
+  }
+};

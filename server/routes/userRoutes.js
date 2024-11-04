@@ -8,6 +8,7 @@ import {
   resetUserPassword,
   sendUserOTP,
   verifyUserOTP,
+  updateUser,
 } from "../controllers/userController.js";
 
 const router = express.Router();
@@ -32,6 +33,9 @@ router.post("/send-otp", sendUserOTP);
 
 // Verify user OTP
 router.post("/verify-otp", verifyUserOTP);
+
+// update a user
+router.post("/update", updateUser);
 
 // Get all users
 router.get("/", getAllUsers);

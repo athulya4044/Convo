@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useState } from "react";
-import { Avatar, ChannelList } from "stream-chat-react";
+import { ChannelList } from "stream-chat-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -12,14 +13,7 @@ import {
 import CustomChannelPreview from "./CustomChannelPreview";
 import { LogOut, User, PlusCircle, ChevronsDownUp } from "lucide-react";
 import { logoConvo } from "@/assets/images";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import AccountInfo from "./AccountInfo";
 
 export default function SidebarMenu({ onCreateChat, client, userId, logout }) {
   const [isAccountInfoOpen, setIsAccountInfoOpen] = useState(false);
@@ -43,6 +37,7 @@ export default function SidebarMenu({ onCreateChat, client, userId, logout }) {
           sort={{ last_message_at: -1 }}
           Preview={CustomChannelPreview}
           showChannelSearch
+          // additionalChannelSearchProps={{ searchForChannels: true }}
         />
       </ScrollArea>
 
@@ -53,13 +48,18 @@ export default function SidebarMenu({ onCreateChat, client, userId, logout }) {
               variant="ghost"
               className="w-full flex flex-row items-center justify-between"
             >
-              <div className="flex flex-row justify-start">
-                <Avatar
-                  image={client?.user?.image_url}
-                  name={client?.user?.name || client?.user?.id}
-                  size={32}
-                  shape="rounded"
-                />
+              <div className="flex flex-row justify-start items-center">
+                <div className="h-10 w-10 flex flex-row justify-center items-center">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage
+                      src={client?.user?.image_url}
+                      alt={client?.user?.name}
+                    />
+                    <AvatarFallback className="bg-primary text-white">
+                      {client?.user?.name?.[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
                 <span className="ml-2">
                   {client.user.name || client.user.id}
                 </span>
@@ -81,40 +81,11 @@ export default function SidebarMenu({ onCreateChat, client, userId, logout }) {
       </div>
 
       {/* Account Info Dialog */}
-      <Dialog open={isAccountInfoOpen} onOpenChange={setIsAccountInfoOpen}>
-        <DialogContent className="flex flex-col h-full">
-          {/* Header */}
-          <DialogHeader className="mb-2">
-            <DialogTitle>Account Information</DialogTitle>
-            <DialogDescription>
-              Your Stream Chat account details.
-            </DialogDescription>
-          </DialogHeader>
-
-          {/* Content */}
-          <div className="flex-1 overflow-auto p-4">
-            <p>
-              <strong>Name:</strong> {client.user.name}
-            </p>
-            <p>
-              <strong>Email:</strong> {client.user.email}
-            </p>
-            <p>
-              <strong>ID:</strong> {client.user.id}
-            </p>
-          </div>
-
-          {/* Footer */}
-          <DialogFooter className="mt-4">
-            <Button
-              onClick={() => setIsAccountInfoOpen(false)}
-              variant="primary"
-            >
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AccountInfo
+        client={client}
+        isAccountInfoOpen={isAccountInfoOpen}
+        setIsAccountInfoOpen={setIsAccountInfoOpen}
+      />
     </div>
   );
 }
