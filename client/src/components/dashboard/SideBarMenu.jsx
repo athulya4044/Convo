@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useState } from "react";
 import { ChannelList } from "stream-chat-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -10,11 +11,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import CustomChannelPreview from "./CustomChannelPreview";
-import { LogOut, User, PlusCircle, ChevronsDownUp } from "lucide-react";
+import { LogOut, User, ChevronsDownUp } from "lucide-react";
 import { logoConvo } from "@/assets/images";
 import AccountInfo from "./AccountInfo";
 
-export default function SidebarMenu({ client, userId, logout, onShowGroupModal }) {
+export default function SidebarMenu({
+  client,
+  userId,
+  logout,
+  onShowGroupModal,
+}) {
   const [isAccountInfoOpen, setIsAccountInfoOpen] = useState(false);
 
   return (
@@ -26,11 +32,11 @@ export default function SidebarMenu({ client, userId, logout, onShowGroupModal }
         </div>
       </div>
       <button
-            className="m-4 p-2 bg-blue-500 text-white rounded"
-            onClick={onShowGroupModal}
-          >
-            Create Group
-          </button>
+        className="m-4 p-2 bg-blue-500 text-white rounded"
+        onClick={onShowGroupModal}
+      >
+        Create Group
+      </button>
       <ScrollArea className="flex-1">
         <ChannelList
           className="max-h-full"
