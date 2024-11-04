@@ -1,12 +1,12 @@
 import { useState, useEffect, useContext } from "react";
 import { StreamChat } from "stream-chat";
 import {
+  Chat,
   Channel,
   Window,
   MessageList,
   MessageInput,
   Thread,
-  Chat,
   LoadingIndicator,
 } from "stream-chat-react";
 import "stream-chat-react/dist/css/v2/index.css";
@@ -16,14 +16,16 @@ import stripSpecialCharacters from "@/utils/stripSpecialCharacters";
 import { AppContext } from "@/utils/store/appContext";
 import SidebarMenu from "../components/dashboard/SideBarMenu";
 import CustomChannelHeader from "../components/dashboard/CustomChannelHeader";
-import CreateChatDialog from "../components/dashboard/CreateChatDialog";
+import CreateGroupModal from "../components/dashboard/CreateGroupModal";
+
 
 const apiKey = "g6dm9he8gx4q";
+
 
 export default function Dashboard() {
   const _ctx = useContext(AppContext);
   const [client, setClient] = useState(null);
-  const [isCreateChatOpen, setIsCreateChatOpen] = useState(false);
+  const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
 
   const userId = stripSpecialCharacters(_ctx.email);
   const userToken = _ctx.streamToken;
@@ -42,36 +44,44 @@ export default function Dashboard() {
     };
   }, [client, userId, userToken]);
 
+  const handleGroupCreated = async (newChannel) => {
+    setChannels((prevChannels) => [newChannel, ...prevChannels]);
+  
+    const response = await client.queryChannels({ members: { $in: [userId] } });
+    setChannels(response);
+  };
+
   if (!client) return <LoadingIndicator size={40} />;
 
   return (
     <Chat client={client} theme="messaging light">
       <div className="flex h-screen bg-white">
-        <SidebarProvider>
+      <SidebarProvider>
           <SidebarMenu
-            onCreateChat={() => setIsCreateChatOpen(true)}
             client={client}
             userId={userId}
+            onShowGroupModal={() => setShowCreateGroupModal(true)}
             logout={() => _ctx.logout(client)}
           />
-          <div className="my-3 flex-1 flex flex-col">
-            <Channel>
-              <Window>
-                <CustomChannelHeader />
-                <MessageList />
-                <MessageInput />
-              </Window>
-              <Thread />
-            </Channel>
-          </div>
-        </SidebarProvider>
-      </div>
-
-      {/* Create Chat Dialog */}
-      <CreateChatDialog
-        isOpen={isCreateChatOpen}
-        onClose={() => setIsCreateChatOpen(false)}
-      />
+        <div className="my-3 flex-1 flex flex-col">
+          <Channel>
+            <Window>
+              <CustomChannelHeader />
+              <MessageList />
+              <MessageInput />
+            </Window>
+            <Thread />
+          </Channel>
+        </div>
+        </SidebarProvider>      
+        </div>  
+          {showCreateGroupModal && (
+        <CreateGroupModal
+          client={client}
+          onClose={() => setShowCreateGroupModal(false)}
+          onGroupCreated={handleGroupCreated}
+        />
+      )} 
     </Chat>
   );
 }

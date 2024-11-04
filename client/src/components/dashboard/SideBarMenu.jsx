@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import { useState } from "react";
 import { ChannelList } from "stream-chat-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -15,7 +14,7 @@ import { LogOut, User, PlusCircle, ChevronsDownUp } from "lucide-react";
 import { logoConvo } from "@/assets/images";
 import AccountInfo from "./AccountInfo";
 
-export default function SidebarMenu({ onCreateChat, client, userId, logout }) {
+export default function SidebarMenu({ client, userId, logout, onShowGroupModal }) {
   const [isAccountInfoOpen, setIsAccountInfoOpen] = useState(false);
 
   return (
@@ -25,11 +24,13 @@ export default function SidebarMenu({ onCreateChat, client, userId, logout }) {
           <img src={logoConvo} alt="Logo" className="h-8 w-auto" />
           CONVO
         </div>
-        <Button onClick={onCreateChat} variant="ghost">
-          <PlusCircle className="w-5 h-5" />
-        </Button>
       </div>
-
+      <button
+            className="m-4 p-2 bg-blue-500 text-white rounded"
+            onClick={onShowGroupModal}
+          >
+            Create Group
+          </button>
       <ScrollArea className="flex-1">
         <ChannelList
           className="max-h-full"
