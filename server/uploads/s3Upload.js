@@ -1,4 +1,3 @@
-// server/s3Upload.js
 import AWS from "aws-sdk";
 import fs from "fs";
 
@@ -10,19 +9,19 @@ const s3 = new AWS.S3({
 });
 
 export const uploadFileToS3 = async (file) => {
-  const fileContent = fs.readFileSync(file.path); 
-  const params = {
-    Bucket: process.env.BUCKET_NAME,
-    Key: `${Date.now()}_${file.originalname}`,
-    Body: fileContent,
-    ACL: "public-read",
-  };
-
   try {
+    const fileContent = fs.readFileSync(file.path); 
+    const params = {
+      Bucket: process.env.BUCKET_NAME,
+      Key: `${Date.now()}_${file.originalname}`,
+      Body: fileContent,
+    };
+    
     const { Location } = await s3.upload(params).promise();
+    console.log("File uploaded successfully to:", Location);
     return Location;
   } catch (error) {
-    console.error("Error uploading file to S3:", error);
+    console.error("S3 upload error:", error); 
     return null;
   }
 };

@@ -7,13 +7,14 @@ import multer from "multer";
 import fs from "fs";
 
 import userRoutes from "./routes/userRoutes.js";
-import { uploadFileToS3 } from "./s3Upload.js"; // Import the S3 upload function
+import { uploadFileToS3 } from "./uploads/s3Upload.js";
 
 // Initialize app and load environment variables
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 const DATABASE_URL = process.env.DATABASE_URL;
+const upload = multer({ dest: "uploads/" }); 
 
 // Middlewares
 app.use(
@@ -40,19 +41,16 @@ app.get("/", (req, res) => {
   return res.json({ status: "Convo backend server" });
 });
 
-// Multer setup for file uploads
-const upload = multer({ dest: "uploads/" }); // Temporary folder for file uploads
 
 // File upload endpoint for S3
 app.post("/upload", upload.single("file"), async (req, res) => {
   const file = req.file;
   if (!file) return res.status(400).json({ error: "No file uploaded" });
-
   try {
-    const s3Url = await uploadFileToS3(file); // Call S3 upload function
-    fs.unlinkSync(file.path); // Remove file from local storage after uploading to S3
+    const s3Url = await uploadFileToS3(file); 
+    fs.unlinkSync(file.path); 
     if (s3Url) {
-      res.json({ url: s3Url }); // Return S3 URL as response
+      res.json({ url: s3Url }); 
     } else {
       res.status(500).json({ error: "Failed to upload file to S3" });
     }
