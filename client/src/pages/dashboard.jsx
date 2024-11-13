@@ -18,10 +18,6 @@ import SidebarMenu from "../components/dashboard/SideBarMenu";
 import CustomChannelHeader from "../components/dashboard/CustomChannelHeader";
 import CreateGroupModal from "../components/dashboard/CreateGroupModal";
 
-
-const apiKey = "g6dm9he8gx4q";
-
-
 export default function Dashboard() {
   const _ctx = useContext(AppContext);
   const [client, setClient] = useState(null);
@@ -32,7 +28,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     const initChat = async () => {
-      const chatClient = StreamChat.getInstance(apiKey);
+      const chatClient = StreamChat.getInstance(
+        import.meta.env.VITE_STREAM_API_KEY
+      );
       await chatClient.connectUser({ id: userId }, userToken);
       setClient(chatClient);
     };
@@ -46,42 +44,47 @@ export default function Dashboard() {
 
   const handleGroupCreated = async (newChannel) => {
     setChannels((prevChannels) => [newChannel, ...prevChannels]);
-  
+
     const response = await client.queryChannels({ members: { $in: [userId] } });
     setChannels(response);
   };
 
-  if (!client) return <LoadingIndicator size={40} />;
+  if (!client)
+    return (
+      <div className="w-100 h-[100vh] flex flex-row justify-center items-center">
+        <LoadingIndicator size={50} />
+      </div>
+    );
 
   return (
     <Chat client={client} theme="messaging light">
       <div className="flex h-screen bg-white">
-      <SidebarProvider>
+        <SidebarProvider>
           <SidebarMenu
             client={client}
             userId={userId}
             onShowGroupModal={() => setShowCreateGroupModal(true)}
             logout={() => _ctx.logout(client)}
           />
-        <div className="my-3 flex-1 flex flex-col">
-          <Channel>
-            <Window>
-              <CustomChannelHeader />
-              <MessageList />
-              <MessageInput />
-            </Window>
-            <Thread />
-          </Channel>
-        </div>
-        </SidebarProvider>      
-        </div>  
-          {showCreateGroupModal && (
+          <div className="my-3 flex-1 flex flex-col">
+            <Channel>
+              <Window>
+                <CustomChannelHeader />
+                <MessageList />
+                <MessageInput />
+              </Window>
+              <Thread />
+            </Channel>
+          </div>
+        </SidebarProvider>
+      </div>
+      {showCreateGroupModal && (
         <CreateGroupModal
           client={client}
           onClose={() => setShowCreateGroupModal(false)}
           onGroupCreated={handleGroupCreated}
         />
-      )} 
+      )}
     </Chat>
   );
 }

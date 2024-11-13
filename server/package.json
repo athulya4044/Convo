@@ -12,6 +12,7 @@
   "author": "Bhargav K, Athulya Mary, Joemol Joy",
   "license": "ISC",
   "dependencies": {
+    "@google/generative-ai": "^0.21.0",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",

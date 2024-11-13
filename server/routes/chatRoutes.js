@@ -1,10 +1,12 @@
 import express from "express";
-import { createChat } from "../controllers/chatController.js";
+import { handleConvoAIQuery } from "../controllers/chatController.js";
 
 const router = express.Router();
 
 // Create new chat
-router.post("/create-chat", createChat);
+// router.post("/create-chat", createChat);
+
+// create gemini chat
+router.post("/chat", handleConvoAIQuery);
 
 export default router;
-

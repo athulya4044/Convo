@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+// SideBarMenu.jsx
 import { useState } from "react";
 import { ChannelList } from "stream-chat-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -31,20 +32,16 @@ export default function SidebarMenu({
           CONVO
         </div>
       </div>
-      <button
-        className="m-4 p-2 bg-blue-500 text-white rounded"
-        onClick={onShowGroupModal}
-      >
+      <Button className="m-4 p-2" onClick={onShowGroupModal}>
         Create Group
-      </button>
+      </Button>
       <ScrollArea className="flex-1">
         <ChannelList
           className="max-h-full"
-          filters={{ members: { $in: [userId] } }}
+          filters={{ members: { $in: [userId, "convoAI"] } }}
           sort={{ last_message_at: -1 }}
           Preview={CustomChannelPreview}
           showChannelSearch
-          // additionalChannelSearchProps={{ searchForChannels: true }}
         />
       </ScrollArea>
 
