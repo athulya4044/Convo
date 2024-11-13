@@ -1,0 +1,30 @@
+@import "./index.css";
+
+/* preview initials */
+.str-chat__avatar .str-chat__avatar-image {
+  background-color: transparent;
+}
+
+.str-chat__avatar .str-chat__avatar-fallback {
+  background-color: hsl(275 100% 25%);
+}
+
+/* chat bg and reactions bg - sender */
+.str-chat__li--top .str-chat__message--me .str-chat__message-bubble,
+.str-chat__li--single .str-chat__message--me .str-chat__message-bubble,
+.str-chat__message-reactions-container
+  .str-chat__message-reactions
+  .str-chat__message-reaction.str-chat__message-reaction-own,
+.str-chat__quoted-message-preview
+  .str-chat__message-inner
+  .str-chat__message-bubble
+  .str-chat__message-text,
+.str-chat__message.str-chat__message--me .str-chat__message-bubble {
+  background-color: hsl(272, 72%, 93%);
+}
+
+/* chat bg and reactions bg - receiver */
+.str-chat__li--top .str-chat__message--other .str-chat__message-bubble,
+.str-chat__li--single .str-chat__message--other .str-chat__message-bubble {
+  background-color: rgb(240, 240, 240);
+}

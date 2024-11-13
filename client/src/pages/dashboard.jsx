@@ -9,14 +9,27 @@ import {
   Thread,
   LoadingIndicator,
 } from "stream-chat-react";
+import { EmojiPicker } from "stream-chat-react/emojis";
 import "stream-chat-react/dist/css/v2/index.css";
-
+import axios from "axios";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import stripSpecialCharacters from "@/utils/stripSpecialCharacters";
 import { AppContext } from "@/utils/store/appContext";
 import SidebarMenu from "../components/dashboard/SideBarMenu";
-import CustomChannelHeader from "../components/dashboard/CustomChannelHeader";
 import CreateGroupModal from "../components/dashboard/CreateGroupModal";
+import CustomChannelHeader from "@/components/dashboard/CustomChannelHeader";
+
+// create / get ai chat for every user
+async function getOrCreateConvoAIChannel(userId, client) {
+  const channelId = `${userId}_convoAI`;
+  const channel = client.channel("messaging", channelId, {
+    created_by_id: userId,
+    name: "ConvoAI 🤖",
+    members: [userId, "convoAI"],
+  });
+  await channel.create();
+  return channel;
+}
 
 export default function Dashboard() {
   const _ctx = useContext(AppContext);
@@ -33,6 +46,23 @@ export default function Dashboard() {
       );
       await chatClient.connectUser({ id: userId }, userToken);
       setClient(chatClient);
+
+      const convoAIChannel = await getOrCreateConvoAIChannel(
+        userId,
+        chatClient
+      );
+      if (!convoAIChannel.hasListener) {
+        convoAIChannel.on("message.new", async (event) => {
+          const newMessage = event.message;
+          if (newMessage.user.id === userId) {
+            await axios.post("http://localhost:4000/api/ai/chat", {
+              userId,
+              message: newMessage.text,
+            });
+          }
+        });
+        convoAIChannel.hasListener = true;
+      }
     };
 
     initChat();
@@ -67,7 +97,7 @@ export default function Dashboard() {
             logout={() => _ctx.logout(client)}
           />
           <div className="my-3 flex-1 flex flex-col">
-            <Channel>
+            <Channel EmojiPicker={EmojiPicker}>
               <Window>
                 <CustomChannelHeader />
                 <MessageList />

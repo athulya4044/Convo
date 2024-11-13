@@ -4,6 +4,7 @@ import {
   useChatContext,
 } from "stream-chat-react";
 import { Users } from "lucide-react";
+import { logoConvo } from "@/assets/images";
 
 export default function CustomChannelHeader() {
   const { channel } = useChannelStateContext();
@@ -22,12 +23,18 @@ export default function CustomChannelHeader() {
     : channel.data?.name || "Unnamed Group";
   const memberCount = members.length;
 
+  const isAIChannel = channel.id.includes("convoAI"); // Check if this is the AI chat channel
+
   return (
     <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200">
       <div className="flex items-center space-x-3">
         <Avatar
           image={
-            isOneToOneChat ? otherMembers[0]?.user?.image : channel.data?.image
+            isAIChannel
+              ? logoConvo
+              : isOneToOneChat
+              ? otherMembers[0]?.user?.image
+              : channel.data?.image
           }
           name={displayName}
           size={40}

@@ -19,6 +19,7 @@ async function getOrCreateConvoAIChannel(userId) {
     created_by_id: userId,
     members: [userId, "convoAI"],
   });
+  // only creates if not available
   await channel.create();
   return channel;
 }
@@ -28,7 +29,6 @@ async function getGeminiResponse(query) {
   const prompt = `${defaultContext}${query}`;
 
   const result = await model.generateContent(prompt);
-  console.log(result.response.text());
   return result.response.text();
 }
 
@@ -48,7 +48,7 @@ export async function handleConvoAIQuery(req, res) {
       user_id: "convoAI",
     });
 
-    return res.status(200).json({ success: true, response: aiResponse });
+    return res.status(200).json({ success: true });
   } catch (error) {
     console.error("Error handling user message:", error);
     res.status(500).json({ success: false, error: "Server error" });
