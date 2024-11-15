@@ -16,8 +16,8 @@ import { AppContext } from "@/utils/store/appContext";
 import SidebarMenu from "../components/dashboard/SideBarMenu";
 import CustomChannelHeader from "../components/dashboard/CustomChannelHeader";
 import CreateGroupModal from "../components/dashboard/CreateGroupModal";
-import CustomMessageInput from "@/components/dashboard/CustomMessageInput";
-import CustomMessage from "@/components/dashboard/CustomMessage";
+import CustomMessageInput from "../components/dashboard/CustomMessageInput";
+import CustomMessage from "../components/dashboard/CustomMessage";
 
 const apiKey = "g6dm9he8gx4q";
 
@@ -66,7 +66,7 @@ export default function Dashboard() {
             <Channel>
               <Window>
                 <CustomChannelHeader />
-                <MessageList Message={CustomMessage} />
+                <MessageList Message={(props) => <CustomMessage {...props} />} />
                 <CustomMessageInput /> 
               </Window>
               <Thread />

@@ -45,17 +45,21 @@ app.get("/", (req, res) => {
 // File upload endpoint for S3
 app.post("/upload", upload.single("file"), async (req, res) => {
   const file = req.file;
-  if (!file) return res.status(400).json({ error: "No file uploaded" });
+  const channelId = req.body.channelId;
+
+  if (!file || !channelId) {
+    console.error("Missing file or channelId");
+    return res.status(400).json({ error: "File or channelId missing" });
+  }
+
   try {
-    const s3Url = await uploadFileToS3(file); 
-    fs.unlinkSync(file.path); 
-    if (s3Url) {
-      res.json({ url: s3Url }); 
-    } else {
-      res.status(500).json({ error: "Failed to upload file to S3" });
-    }
+    const s3Url = await uploadFileToS3(file, channelId); // Upload to S3
+    console.log("S3 URL returned:", s3Url); // Log the S3 URL
+
+    fs.unlinkSync(file.path); // Clean up local file after upload
+    res.json({ url: s3Url }); // Send the S3 URL in the response
   } catch (error) {
-    console.error("File upload error:", error);
+    console.error("File upload error:", error); // Log any errors
     res.status(500).json({ error: "Server error during file upload" });
   }
 });

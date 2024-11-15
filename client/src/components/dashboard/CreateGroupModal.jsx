@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-
 export default function CreateGroupModal ({ client, onClose, onGroupCreated }) {
     const [groupName, setGroupName] = useState("");
     const [members, setMembers] = useState([]);

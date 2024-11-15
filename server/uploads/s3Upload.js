@@ -8,20 +8,21 @@ const s3 = new AWS.S3({
   region: process.env.AWS_REGION,
 });
 
-export const uploadFileToS3 = async (file) => {
+export const uploadFileToS3 = async (file, channelId) => {
   try {
-    const fileContent = fs.readFileSync(file.path); 
+    const fileContent = fs.readFileSync(file.path);
+    const timestamp = Date.now();
     const params = {
       Bucket: process.env.BUCKET_NAME,
-      Key: `${Date.now()}_${file.originalname}`,
+      Key: `uploads/${channelId}/${timestamp}_${file.originalname}`,
       Body: fileContent,
+      ContentType: file.mimetype, 
     };
-    
+
     const { Location } = await s3.upload(params).promise();
-    console.log("File uploaded successfully to:", Location);
-    return Location;
+    return Location; 
   } catch (error) {
-    console.error("S3 upload error:", error); 
-    return null;
+    console.error("S3 upload error:", error);
+    throw error;
   }
 };

@@ -1,73 +1,61 @@
 import { MessageInput, useChannelStateContext } from "stream-chat-react";
-import { uploadFile } from "@/utils/uploadFile";
+import { uploadFile } from "../../utils/uploadFile";
+import { useState } from "react";
 
-export default function CustomMessageInput() {
+function CustomMessageInput() {
   const { channel } = useChannelStateContext();
+  const [selectedAttachments, setSelectedAttachments] = useState([]);
+
+  const handleSendMessage = async (message) => {
+    if (!channel) {
+      console.error("Channel not found");
+      return;
+    }
+    let attachments = [];
+    if (selectedAttachments.length > 0) {
+      attachments = await Promise.all(
+        selectedAttachments.map(async (file) => {
+          const s3Url = await uploadFile(file, channel.id);
+          return {
+            type: file.type.startsWith("image") ? "image" : "file",
+            asset_url: s3Url,
+            image_url: s3Url,
+            title: file.name,
+          };
+        })
+      );
+    }
+
+    const messageData = {
+      text: message.text || "",
+      attachments,
+    };
+
+    try {
+      await channel.sendMessage(messageData);
+      setSelectedAttachments([]); 
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
 
   return (
-    <MessageInput
-      overrideSubmitHandler={async (message) => {
-        console.log("Sending message with attachments:", message);
+    <div>
+      <MessageInput
+        overrideSubmitHandler={handleSendMessage}
 
-        if (!channel) {
-          console.error("Channel not found");
-          return;
-        }
+        doFileUploadRequest={async (file) => {
+          setSelectedAttachments((prev) => [...prev, file]);
+          return { type: "file", asset_url: "", title: file.name }; 
+        }}
 
-        try {
-          const files = message.attachments?.filter((attachment) => attachment.file);
-
-          let s3Attachments = [];
-          if (files && files.length > 0) {
-            s3Attachments = await Promise.all(
-              files.map(async (file) => {
-                const s3Url = await uploadFile(file); 
-                console.log("File uploaded to S3:", s3Url);
-                
-                return {
-                  asset_url: s3Url,
-                  title: file.name,
-                  type: "file", 
-                };
-              })
-            );
-          }
-
-          await channel.sendMessage({
-            text: message.text,
-            attachments: s3Attachments, 
-          });
-          console.log("Message sent successfully");
-        } catch (error) {
-          console.error("Error sending message:", error);
-        }
-      }}
-      
-      // Custom function to handle file uploads directly to S3
-      doFileUploadRequest={async (file) => {
-        try {
-          const s3Url = await uploadFile(file);
-          console.log("File uploaded to S3:", s3Url);
-          return { asset_url: s3Url, title: file.name }; 
-        } catch (error) {
-          console.error("Error uploading file to S3:", error);
-          throw error; 
-        }
-      }}
-      
-      // Custom function to handle image uploads directly to S3
-      doImageUploadRequest={async (file) => {
-        try {
-          const s3Url = await uploadFile(file); 
-          console.log("Image uploaded to S3:", s3Url);
-          return { asset_url: s3Url, title: file.name }; 
-        } catch (error) {
-          console.error("Error uploading image to S3:", error);
-          throw error; 
-        }
-      }}
-    />
+        doImageUploadRequest={async (file) => {
+          setSelectedAttachments((prev) => [...prev, file]);
+          return { type: "image", image_url: "", title: file.name }; 
+        }}
+      />
+    </div>
   );
 }
 
-
+export default CustomMessageInput;
