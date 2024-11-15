@@ -62,7 +62,8 @@ export async function sendPasswordResetEmail({ email, token, userName }) {
       html: htmlEmail,
     });
 
-    console.log("Message sent: %s", info.messageId);
+    
+    log("Message sent: %s", info.messageId);
     return {
       success: true,
       message: "Password reset email sent successfully.",

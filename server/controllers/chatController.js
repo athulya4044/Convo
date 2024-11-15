@@ -1,27 +1,56 @@
-import Chat from "../models/Chat.js";
+import { StreamChat } from "stream-chat";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Create new chat
-export const createChat = async (req, res) => {
+// Initialize Google Gemini and StreamChat client with API key and secret
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const serverClient = StreamChat.getInstance(
+  process.env.STREAM_API_KEY,
+  process.env.STREAM_API_SECRET
+);
+
+let defaultContext = `You are ConvoAI, a helpful and friendly assistant. Your job is to assist users with their queries in a clear and concise manner. Always be polite and friendly. Respond based on general knowledge, unless the user asks for something more specific.\n
+  User Query: `;
+
+// Function to create or retrieve the ConvoAI channel
+async function getOrCreateConvoAIChannel(userId) {
+  const channelId = `${userId}_convoAI`;
+  const channel = serverClient.channel("messaging", channelId, {
+    created_by_id: userId,
+    members: [userId, "convoAI"],
+  });
+  // only creates if not available
+  await channel.create();
+  return channel;
+}
+
+// Function to get AI response from Gemini
+async function getGeminiResponse(query) {
+  const prompt = `${defaultContext}${query}`;
+
+  const result = await model.generateContent(prompt);
+  return result.response.text();
+}
+
+// Endpoint to handle user message to ConvoAI
+export async function handleConvoAIQuery(req, res) {
+  const { userId, message } = req.body;
+
   try {
-    const { chat_name, is_group = false, is_private = true } = req.body;
+    const channel = await getOrCreateConvoAIChannel(userId);
 
-    if (!chat_name) {
-      return res.status(400).json({ error: "Chat name is required" });
-    }
+    // Forward user message to Gemini AI
+    const aiResponse = await getGeminiResponse(message);
 
-    const newChat = new Chat({
-      chat_name,
-      is_group,
-      is_private,
+    // Send AI response as a message in Stream Chat
+    await channel.sendMessage({
+      text: aiResponse,
+      user_id: "convoAI",
     });
 
-    await newChat.save();
-
-    res.status(201).json({
-      message: "Chat created successfully",
-      chat: newChat,
-    });
+    return res.status(200).json({ success: true });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Error handling user message:", error);
+    res.status(500).json({ success: false, error: "Server error" });
   }
-};
+}

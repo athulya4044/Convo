@@ -7,6 +7,7 @@ import multer from "multer";
 import fs from "fs";
 
 import userRoutes from "./routes/userRoutes.js";
+import chatRoutes from "./routes/chatRoutes.js";
 import { uploadFileToS3 } from "./uploads/s3Upload.js";
 
 // Initialize app and load environment variables
@@ -36,6 +37,7 @@ mongoose
 
 // Routes
 app.use("/api/users", userRoutes);
+app.use("/api/ai", chatRoutes);
 
 app.get("/", (req, res) => {
   return res.json({ status: "Convo backend server" });

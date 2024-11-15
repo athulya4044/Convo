@@ -8,6 +8,7 @@ import ForgotPassword from "./pages/forgotPassword";
 import ResetPassword from "./pages/resetPassword";
 import { AppContext } from "./utils/store/appContext";
 import Dashboard from "./pages/dashboard";
+import "./App.css";
 
 const App = () => {
   const { isLoggedIn } = useContext(AppContext);

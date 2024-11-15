@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+// SideBarMenu.jsx
 import { useState } from "react";
 import { ChannelList } from "stream-chat-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -23,6 +24,17 @@ export default function SidebarMenu({
 }) {
   const [isAccountInfoOpen, setIsAccountInfoOpen] = useState(false);
 
+  // Custom sorting function to pin the AI channel at the top
+  const customSort = (channels) => {
+    const aiChannelId = `${userId}_convoAI`;
+    return channels.sort((a, b) => {
+      if (a.id === aiChannelId) return -1; // AI channel goes to the top
+      if (b.id === aiChannelId) return 1;
+      // Default sorting based on last message timestamp
+      return b.state.last_message_at - a.state.last_message_at;
+    });
+  };
+
   return (
     <div className="w-80 h-full flex flex-col border-r border-gray-200">
       <div className="w-full p-4 flex items-center justify-between">
@@ -31,20 +43,17 @@ export default function SidebarMenu({
           CONVO
         </div>
       </div>
-      <button
-        className="m-4 p-2 bg-blue-500 text-white rounded"
-        onClick={onShowGroupModal}
-      >
+      <Button className="m-4 p-2" onClick={onShowGroupModal}>
         Create Group
-      </button>
+      </Button>
       <ScrollArea className="flex-1">
         <ChannelList
           className="max-h-full"
           filters={{ members: { $in: [userId] } }}
           sort={{ last_message_at: -1 }}
           Preview={CustomChannelPreview}
+          channelRenderFilterFn={customSort}
           showChannelSearch
-          // additionalChannelSearchProps={{ searchForChannels: true }}
         />
       </ScrollArea>
 

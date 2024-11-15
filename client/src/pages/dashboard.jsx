@@ -8,16 +8,30 @@ import {
   Thread,
   LoadingIndicator,
 } from "stream-chat-react";
+import { EmojiPicker } from "stream-chat-react/emojis";
 import "stream-chat-react/dist/css/v2/index.css";
-
+import axios from "axios";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import stripSpecialCharacters from "@/utils/stripSpecialCharacters";
 import { AppContext } from "@/utils/store/appContext";
 import SidebarMenu from "../components/dashboard/SideBarMenu";
-import CustomChannelHeader from "../components/dashboard/CustomChannelHeader";
 import CreateGroupModal from "../components/dashboard/CreateGroupModal";
+import CustomChannelHeader from "@/components/dashboard/CustomChannelHeader";
 import CustomMessageInput from "../components/dashboard/CustomMessageInput";
 import CustomMessage from "../components/dashboard/CustomMessage";
+
+// create / get ai chat for every user
+async function getOrCreateConvoAIChannel(userId, client) {
+  const channelId = `${userId}_convoAI`;
+  const channel = client.channel("messaging", channelId, {
+    created_by_id: userId,
+    name: "ConvoAI 🤖",
+    members: [userId, "convoAI"],
+  });
+  await channel.create();
+  return channel;
+}
+
 
 const apiKey = "g6dm9he8gx4q";
 
@@ -31,9 +45,28 @@ export default function Dashboard() {
 
   useEffect(() => {
     const initChat = async () => {
-      const chatClient = StreamChat.getInstance(apiKey);
+      const chatClient = StreamChat.getInstance(
+        import.meta.env.VITE_STREAM_API_KEY
+      );
       await chatClient.connectUser({ id: userId }, userToken);
       setClient(chatClient);
+
+      const convoAIChannel = await getOrCreateConvoAIChannel(
+        userId,
+        chatClient
+      );
+      if (!convoAIChannel.hasListener) {
+        convoAIChannel.on("message.new", async (event) => {
+          const newMessage = event.message;
+          if (newMessage.user.id === userId) {
+            await axios.post("http://localhost:4000/api/ai/chat", {
+              userId,
+              message: newMessage.text,
+            });
+          }
+        });
+        convoAIChannel.hasListener = true;
+      }
     };
 
     initChat();
@@ -45,12 +78,16 @@ export default function Dashboard() {
 
   const handleGroupCreated = async (newChannel) => {
     setChannels((prevChannels) => [newChannel, ...prevChannels]);
-
     const response = await client.queryChannels({ members: { $in: [userId] } });
     setChannels(response);
   };
 
-  if (!client) return <LoadingIndicator size={40} />;
+  if (!client)
+    return (
+      <div className="w-100 h-[100vh] flex flex-row justify-center items-center">
+        <LoadingIndicator size={50} />
+      </div>
+    );
 
   return (
     <Chat client={client} theme="messaging light">
@@ -63,7 +100,7 @@ export default function Dashboard() {
             logout={() => _ctx.logout(client)}
           />
           <div className="my-3 flex-1 flex flex-col">
-            <Channel>
+            <Channel EmojiPicker={EmojiPicker}>
               <Window>
                 <CustomChannelHeader />
                 <MessageList Message={(props) => <CustomMessage {...props} />} />

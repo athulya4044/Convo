@@ -1,18 +1,24 @@
 import { Card, CardHeader } from "@/components/ui/card";
 import { Avatar, useChatContext } from "stream-chat-react";
+import { logoConvo } from "../../assets/images";
 
 export default function CustomChannelPreview({ channel, setActiveChannel }) {
   const { client } = useChatContext();
   const { name, image } = channel.data || {};
   const members = Object.values(channel.state.members);
+
   const otherMembers = members.filter(
     (member) => member.user?.id !== client.userID
   );
+
   const displayName =
     name ||
     otherMembers
       .map((member) => member.user?.name || member.user?.id)
       .join(", ");
+
+  // to style ConvoAI
+  const isAIChannel = channel.id.includes("convoAI"); // Check if this is the AI chat channel
 
   return (
     <Card
@@ -20,7 +26,12 @@ export default function CustomChannelPreview({ channel, setActiveChannel }) {
       onClick={() => setActiveChannel(channel)}
     >
       <CardHeader className="p-3 flex flex-row justify-start items-center space-x-3">
-        <Avatar image={image} name={displayName} size={40} shape="rounded" />
+        <Avatar
+          image={isAIChannel ? logoConvo : image}
+          name={displayName}
+          size={40}
+          shape="rounded"
+        />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-gray-800 truncate">
             {displayName}
