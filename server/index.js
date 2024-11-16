@@ -43,7 +43,6 @@ app.get("/", (req, res) => {
   return res.json({ status: "Convo backend server" });
 });
 
-
 // File upload endpoint for S3
 app.post("/upload", upload.single("file"), async (req, res) => {
   const file = req.file;
@@ -55,13 +54,11 @@ app.post("/upload", upload.single("file"), async (req, res) => {
   }
 
   try {
-    const s3Url = await uploadFileToS3(file, channelId); // Upload to S3
-    console.log("S3 URL returned:", s3Url); // Log the S3 URL
-
-    fs.unlinkSync(file.path); // Clean up local file after upload
-    res.json({ url: s3Url }); // Send the S3 URL in the response
+    const s3Url = await uploadFileToS3(file, channelId);
+    fs.unlinkSync(file.path); 
+    res.json({ url: s3Url }); 
   } catch (error) {
-    console.error("File upload error:", error); // Log any errors
+    console.error("File upload error:", error); 
     res.status(500).json({ error: "Server error during file upload" });
   }
 });
