@@ -5,17 +5,14 @@ import {
   Chat,
   Channel,
   Window,
+  MessageInput,
   MessageList,
   Thread,
   LoadingIndicator,
 } from "stream-chat-react";
-import {
-  StreamVideoClient,
-  StreamVideo,
-  StreamCall,
-  SpeakerLayout,
-  CallControls,
-} from "@stream-io/video-react-sdk";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Info } from "lucide-react";
+import { EmojiPicker } from "stream-chat-react/emojis";
 import "stream-chat-react/dist/css/v2/index.css";
 import "@stream-io/video-react-sdk/dist/css/styles.css"; // Video SDK styles
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -24,8 +21,8 @@ import { AppContext } from "@/utils/store/appContext";
 import SidebarMenu from "../components/dashboard/SideBarMenu";
 import CreateGroupModal from "../components/dashboard/CreateGroupModal";
 import CustomChannelHeader from "@/components/dashboard/CustomChannelHeader";
-import CustomMessageInput from "../components/dashboard/CustomMessageInput";
-import CustomMessage from "../components/dashboard/CustomMessage";
+import { Link } from "react-router-dom";
+import PremiumModal from "@/components/dashboard/PremiumModal";
 
 async function getOrCreateConvoAIChannel(userId, client) {
   const channelId = `${userId}_convoAI`;
@@ -114,48 +111,54 @@ export default function Dashboard() {
 
   if (!client || !videoClient || !call)
     return (
-      <div className="w-100 h-[100vh] flex flex-row justify-center items-center">
+      <div className="w-full h-[100%] flex flex-row justify-center items-center">
         <LoadingIndicator size={50} />
       </div>
     );
 
   return (
-    <div className="flex h-screen bg-white">
-      <SidebarProvider>
-        <SidebarMenu
-          client={client}
-          userId={userId}
-          onShowGroupModal={() => setShowCreateGroupModal(true)}
-          logout={() => _ctx.logout(client)}
-        />
-        <div className="my-3 flex-1 flex flex-col">
-          {/* Chat Integration */}
-          <Chat client={client} theme="messaging light">
-            <Channel>
-              <Window>
-                <CustomChannelHeader />
-                <MessageList Message={(props) => <CustomMessage {...props} />} />
-                <CustomMessageInput />
-              </Window>
-              <Thread />
-            </Channel>
-          </Chat>
-
-         
-          <StreamVideo client={videoClient}>
-            <StreamCall call={call}>
-              <SpeakerLayout participantsBarPosition="bottom" />
-              <CallControls />
-            </StreamCall>
-          </StreamVideo>
+    <>
+      {_ctx.userType === "regular" && <PremiumModal />}
+      <Alert className="flex flex-row justify-start gap-1 items-center w-full bg-secondary">
+        <Info className="h-4 w-4" />
+        <AlertDescription>
+          Unlock exclusive features and elevate your experience – upgrade to
+          Convo Premium today !{" "}
+          <Link className="font-bold text-primary underline" to={"/"}>
+            Get started here
+          </Link>
+        </AlertDescription>
+      </Alert>
+      <Chat client={client} theme="messaging light">
+        {/* make this 92vh resizable */}
+        <div className="flex h-[92vh] bg-white">
+          <SidebarProvider>
+            <SidebarMenu
+              client={client}
+              userId={userId}
+              onShowGroupModal={() => setShowCreateGroupModal(true)}
+              logout={() => _ctx.logout(client)}
+            />
+            <div className="my-3 flex-1 flex flex-col">
+              <Channel EmojiPicker={EmojiPicker}>
+                <Window>
+                  <CustomChannelHeader />
+                  <MessageList />
+                  <MessageInput />
+                </Window>
+                <Thread />
+              </Channel>
+            </div>
+          </SidebarProvider>
         </div>
-      </SidebarProvider>
-      {showCreateGroupModal && (
-        <CreateGroupModal
-          client={client}
-          onClose={() => setShowCreateGroupModal(false)}
-        />
-      )}
-    </div>
+        {showCreateGroupModal && (
+          <CreateGroupModal
+            client={client}
+            onClose={() => setShowCreateGroupModal(false)}
+            onGroupCreated={handleGroupCreated}
+          />
+        )}
+      </Chat>
+    </>
   );
 }
