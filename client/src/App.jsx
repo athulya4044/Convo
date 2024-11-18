@@ -9,6 +9,8 @@ import ResetPassword from "./pages/resetPassword";
 import { AppContext } from "./utils/store/appContext";
 import Dashboard from "./pages/dashboard";
 import "./App.css";
+import Payment from "./pages/payment";
+import { Toaster } from "./components/ui/toaster";
 
 const App = () => {
   const { isLoggedIn } = useContext(AppContext);
@@ -19,6 +21,7 @@ const App = () => {
         // Show only the Dashboard without Header and Footer when logged in
         <Routes>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/payment" element={<Payment />} />
           <Route path="*" element={<Navigate replace to="/dashboard" />} />
         </Routes>
       ) : (
@@ -37,6 +40,7 @@ const App = () => {
               <Route path="*" element={<Navigate replace to="/auth" />} />
             </Routes>
           </main>
+          <Toaster />
           <Footer />
         </>
       )}

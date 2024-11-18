@@ -13,6 +13,7 @@ import create from "./create.png";
 import uparrow from "./uparrow.png";
 import downarrow from "./down arrow.png";
 import bg from "./bg.png";
+import premium from "./premium.png";
 
 export {
   bg,
@@ -30,4 +31,5 @@ export {
   create,
   uparrow,
   downarrow,
+  premium,
 };
