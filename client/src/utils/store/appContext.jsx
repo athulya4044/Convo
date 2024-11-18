@@ -3,6 +3,7 @@ import React, { useState } from "react";
 
 export const AppContext = React.createContext({
   email: "",
+  userType: "",
   streamToken: "",
   isLoggedIn: false,
   loginHandler: () => {},
@@ -12,28 +13,34 @@ export const AppContext = React.createContext({
 function getDataFromLocalStorage() {
   const data = localStorage.getItem("loginConfig");
   if (data) {
-    const { email, streamToken } = JSON.parse(data);
-    return { email, streamToken };
+    const { email, streamToken, userType } = JSON.parse(data);
+    return { email, streamToken, userType };
   } else {
-    return { email: null, streamToken: null };
+    return { email: null, streamToken: null, userType: null };
   }
 }
 
 function AppContextProvider({ children }) {
-  const { email: emailFromLS, streamToken: streamTokenFromLS } =
-    getDataFromLocalStorage();
+  const {
+    email: emailFromLS,
+    streamToken: streamTokenFromLS,
+    userType: userTypeFromLS,
+  } = getDataFromLocalStorage();
   const [email, setEmail] = useState(emailFromLS);
   const [streamToken, setStreamToken] = useState(streamTokenFromLS);
+  const [userType, setUserType] = useState(userTypeFromLS);
 
   const isLoggedIn = !!email && !!streamToken;
 
   function loginHandler(loginConfig) {
-    const { email, streamToken } = loginConfig;
+    const { email, streamToken, userType } = loginConfig;
     setEmail(email);
     setStreamToken(streamToken);
+    setUserType(userType);
     const newLoginConfig = {
       email,
       streamToken,
+      userType,
     };
     localStorage.setItem("loginConfig", JSON.stringify(newLoginConfig));
   }
@@ -45,6 +52,7 @@ function AppContextProvider({ children }) {
         client.disconnectUser();
         setEmail(null);
         setStreamToken(null);
+        setUserType(null);
         localStorage.removeItem("loginConfig");
       }
     }
@@ -53,6 +61,7 @@ function AppContextProvider({ children }) {
   const contextValue = {
     email,
     streamToken,
+    userType,
     isLoggedIn: isLoggedIn,
     login: loginHandler,
     logout: logoutHandler,
