@@ -4,6 +4,7 @@ import {
   Chat,
   Channel,
   Window,
+  MessageInput,
   MessageList,
   Thread,
   LoadingIndicator,
@@ -33,9 +34,6 @@ async function getOrCreateConvoAIChannel(userId, client) {
   await channel.create();
   return channel;
 }
-
-
-const apiKey = "g6dm9he8gx4q";
 
 export default function Dashboard() {
   const _ctx = useContext(AppContext);
