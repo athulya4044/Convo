@@ -4,9 +4,6 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input"; 
 import {Toggle} from "../ui/Toggle";
 
-
-
-
 export default function CreateGroupModal({ client, onClose, onGroupCreated }) {
   const [groupName, setGroupName] = useState("");
   const [members, setMembers] = useState([]);

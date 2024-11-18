@@ -28,3 +28,11 @@
 .str-chat__li--single .str-chat__message--other .str-chat__message-bubble {
   background-color: rgb(240, 240, 240);
 }
+
+.text-green-600 {
+  color: darkgreen;
+}
+
+.text-gray-500 {
+  color: gray;
+}
