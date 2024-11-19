@@ -8,7 +8,6 @@ import fs from "fs";
 
 import userRoutes from "./routes/userRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
-import videoRoutes from "./routes/videoRoutes.js";
 import { uploadFileToS3 } from "./uploads/s3Upload.js";
 
 // Initialize app and load environment variables
@@ -39,7 +38,6 @@ mongoose
 // Routes
 app.use("/api/users", userRoutes);
 app.use("/api/ai", chatRoutes);
-app.use('/api/video', videoRoutes);
 
 app.get("/", (req, res) => {
   return res.json({ status: "Convo backend server" });

@@ -1,5 +1,4 @@
 import { useState, useEffect, useContext } from "react";
-import axios from "axios";
 import { StreamChat } from "stream-chat";
 import {
   Chat,
@@ -14,7 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
 import { EmojiPicker } from "stream-chat-react/emojis";
 import "stream-chat-react/dist/css/v2/index.css";
-import "@stream-io/video-react-sdk/dist/css/styles.css"; // Video SDK styles
+import axios from "axios";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import stripSpecialCharacters from "@/utils/stripSpecialCharacters";
 import { AppContext } from "@/utils/store/appContext";
@@ -24,6 +23,7 @@ import CustomChannelHeader from "@/components/dashboard/CustomChannelHeader";
 import { Link } from "react-router-dom";
 import PremiumModal from "@/components/dashboard/PremiumModal";
 
+// create / get ai chat for every user
 async function getOrCreateConvoAIChannel(userId, client) {
   const channelId = `${userId}_convoAI`;
   const channel = client.channel("messaging", channelId, {
@@ -37,71 +37,44 @@ async function getOrCreateConvoAIChannel(userId, client) {
 
 export default function Dashboard() {
   const _ctx = useContext(AppContext);
-  const [client, setClient] = useState(null); // Chat client
-  const [videoClient, setVideoClient] = useState(null); // Video client
-  const [call, setCall] = useState(null);
+  const [client, setClient] = useState(null);
   const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
 
   const userId = stripSpecialCharacters(_ctx.email);
   const userToken = _ctx.streamToken;
 
-  // Fetch video token from backend
-  const fetchVideoToken = async () => {
-    const response = await axios.post(
-      `${import.meta.env.VITE_BACKEND_URL}/api/video/generate-token`,
-      { userId }
-    );
-    return response.data.token;
-  };
-
   useEffect(() => {
-    const initClients = async () => {
-      try {
-        // Initialize chat client
-        const chatClient = StreamChat.getInstance(import.meta.env.VITE_STREAM_API_KEY);
-        await chatClient.connectUser({ id: userId }, userToken);
-        setClient(chatClient);
+    const initChat = async () => {
+      const chatClient = StreamChat.getInstance(
+        import.meta.env.VITE_STREAM_API_KEY
+      );
+      await chatClient.connectUser({ id: userId }, userToken);
+      setClient(chatClient);
 
-        // Initialize ConvoAI Channel
-        const convoAIChannel = await getOrCreateConvoAIChannel(userId, chatClient);
-        if (!convoAIChannel.hasListener) {
-          convoAIChannel.on("message.new", async (event) => {
-            const newMessage = event.message;
-            if (newMessage.user.id === userId) {
-              await axios.post("http://localhost:4000/api/ai/chat", {
-                userId,
-                message: newMessage.text,
-              });
-            }
-          });
-          convoAIChannel.hasListener = true;
-        }
-
-        // Fetch video token and initialize video client
-        const videoToken = await fetchVideoToken();
-        const videoClientInstance = new StreamVideoClient({
-          apiKey: import.meta.env.VITE_STREAM_API_KEY,
-          user: { id: userId, name: _ctx.name },
-          token: videoToken,
+      const convoAIChannel = await getOrCreateConvoAIChannel(
+        userId,
+        chatClient
+      );
+      if (!convoAIChannel.hasListener) {
+        convoAIChannel.on("message.new", async (event) => {
+          const newMessage = event.message;
+          if (newMessage.user.id === userId) {
+            await axios.post("http://localhost:4000/api/ai/chat", {
+              userId,
+              message: newMessage.text,
+            });
+          }
         });
-        setVideoClient(videoClientInstance);
-
-        // Create or join a video call
-        const videoCall = videoClientInstance.call("default", "video-chat");
-        await videoCall.join({ create: true });
-        setCall(videoCall);
-      } catch (error) {
-        console.error("Error initializing clients:", error);
+        convoAIChannel.hasListener = true;
       }
     };
 
-    initClients();
+    initChat();
 
     return () => {
       if (client) client.disconnectUser();
-      if (videoClient) videoClient.disconnect();
     };
-  }, [userId, userToken, client, videoClient]);
+  }, [client, userId, userToken]);
 
   const handleGroupCreated = async (newChannel) => {
     setChannels((prevChannels) => [newChannel, ...prevChannels]);
@@ -109,7 +82,7 @@ export default function Dashboard() {
     setChannels(response);
   };
 
-  if (!client || !videoClient || !call)
+  if (!client)
     return (
       <div className="w-full h-[100%] flex flex-row justify-center items-center">
         <LoadingIndicator size={50} />
