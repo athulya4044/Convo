@@ -5,8 +5,9 @@ import {
 } from "stream-chat-react";
 import { Users } from "lucide-react";
 import { logoConvo } from "@/assets/images";
+import { FaVideo } from "react-icons/fa"; // Importing the video call icon
 
-export default function CustomChannelHeader() {
+export default function CustomChannelHeader({ activeTab, setActiveTab }) {
   const { channel } = useChannelStateContext();
   const { client } = useChatContext();
 
@@ -33,6 +34,7 @@ export default function CustomChannelHeader() {
 
   return (
     <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200">
+      {/* Left Side - Avatar and Display Name */}
       <div className="flex items-center space-x-3">
         <Avatar
           image={
@@ -64,6 +66,34 @@ export default function CustomChannelHeader() {
             </p>
           )}
         </div>
+      </div>
+
+      {/* Centered Tabs */}
+      <div className="flex-1 flex justify-center space-x-4">
+        {["chat", "share", "about"].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 text-sm font-medium ${
+              activeTab === tab
+                ? "text-blue-500 border-b-2 border-blue-500"
+                : "text-gray-500 hover:text-gray-700 border-b-2 border-transparent"
+            } focus:outline-none`}
+          >
+            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+          </button>
+        ))}
+      </div>
+
+      {/* Right Side - Video Call Icon */}
+      <div className="flex items-center space-x-3 mr-6">
+        <button
+          className="text-gray-500 hover:text-gray-700 focus:outline-none"
+          onClick={() => alert('Initiate Video Call')} // Replace with your video call handler
+          title="Start Video Call"
+        >
+          <FaVideo size={20} />
+        </button>
       </div>
     </div>
   );

@@ -20,8 +20,11 @@ import { AppContext } from "@/utils/store/appContext";
 import SidebarMenu from "../components/dashboard/SideBarMenu";
 import CreateGroupModal from "../components/dashboard/CreateGroupModal";
 import CustomChannelHeader from "@/components/dashboard/CustomChannelHeader";
-import { Link } from "react-router-dom";
-import PremiumModal from "@/components/dashboard/PremiumModal";
+import CustomMessageInput from "../components/dashboard/CustomMessageInput";
+import CustomMessage from "../components/dashboard/CustomMessage";
+import About from "../components/chatComponents/About";
+import Share from "../components/chatComponents/Share";
+
 
 // create / get ai chat for every user
 async function getOrCreateConvoAIChannel(userId, client) {
@@ -35,26 +38,48 @@ async function getOrCreateConvoAIChannel(userId, client) {
   return channel;
 }
 
+
+//const apiKey = "g6dm9he8gx4q";
+
 export default function Dashboard() {
   const _ctx = useContext(AppContext);
   const [client, setClient] = useState(null);
   const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
+  const [activeTab, setActiveTab] = useState("chat"); // State to manage active tab
+
+  //const [sharedItems, setSharedItems] = useState([]);
+  const [sharedItems, setSharedItems] = useState({});
+
+  const updateSharedItems = (channelId, items) => {
+    setSharedItems((prevItems) => ({
+      ...prevItems,
+      [channelId]: items,
+    }));
+  };
+
+  // Function to add shared items
+  // const addSharedItem = (item) => {
+  //   setSharedItems((prevItems) => [...prevItems, item]);
+  // };
+
+  const addSharedItem = (item, channelId) => {
+    setSharedItems((prevItems) => ({
+      ...prevItems,
+      [channelId]: [...(prevItems[channelId] || []), item], 
+    }));
+  };
+
 
   const userId = stripSpecialCharacters(_ctx.email);
   const userToken = _ctx.streamToken;
 
   useEffect(() => {
     const initChat = async () => {
-      const chatClient = StreamChat.getInstance(
-        import.meta.env.VITE_STREAM_API_KEY
-      );
+      const chatClient = StreamChat.getInstance(import.meta.env.VITE_STREAM_API_KEY);
       await chatClient.connectUser({ id: userId }, userToken);
       setClient(chatClient);
 
-      const convoAIChannel = await getOrCreateConvoAIChannel(
-        userId,
-        chatClient
-      );
+      const convoAIChannel = await getOrCreateConvoAIChannel(userId, chatClient);
       if (!convoAIChannel.hasListener) {
         convoAIChannel.on("message.new", async (event) => {
           const newMessage = event.message;
@@ -90,48 +115,58 @@ export default function Dashboard() {
     );
 
   return (
-    <>
-      {_ctx.userType === "regular" && <PremiumModal />}
-      <Alert className="flex flex-row justify-start gap-1 items-center w-full bg-secondary">
-        <Info className="h-4 w-4" />
-        <AlertDescription>
-          Unlock exclusive features and elevate your experience – upgrade to
-          Convo Premium today !{" "}
-          <Link className="font-bold text-primary underline" to={"/"}>
-            Get started here
-          </Link>
-        </AlertDescription>
-      </Alert>
-      <Chat client={client} theme="messaging light">
-        {/* make this 92vh resizable */}
-        <div className="flex h-[92vh] bg-white">
-          <SidebarProvider>
-            <SidebarMenu
-              client={client}
-              userId={userId}
-              onShowGroupModal={() => setShowCreateGroupModal(true)}
-              logout={() => _ctx.logout(client)}
-            />
-            <div className="my-3 flex-1 flex flex-col">
-              <Channel EmojiPicker={EmojiPicker}>
-                <Window>
-                  <CustomChannelHeader />
-                  <MessageList />
-                  <MessageInput />
-                </Window>
-                <Thread />
-              </Channel>
-            </div>
-          </SidebarProvider>
-        </div>
-        {showCreateGroupModal && (
-          <CreateGroupModal
+    <Chat client={client} theme="messaging light">
+      <div className="flex h-screen bg-white">
+        <SidebarProvider>
+          <SidebarMenu
             client={client}
-            onClose={() => setShowCreateGroupModal(false)}
-            onGroupCreated={handleGroupCreated}
+            userId={userId}
+            onShowGroupModal={() => setShowCreateGroupModal(true)}
+            logout={() => _ctx.logout(client)}
           />
-        )}
-      </Chat>
-    </>
+          <div className="my-3 flex-1 flex flex-col">
+            <Channel EmojiPicker={EmojiPicker}>
+              <Window>
+                {/* Pass activeTab and setActiveTab to CustomChannelHeader */}
+                <CustomChannelHeader
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                />
+
+                {/* Conditional rendering based on activeTab */}
+                {activeTab === "chat" && (
+                  <MessageList
+                    Message={(props) => <CustomMessage {...props} />}
+                  />
+                )}
+
+                {activeTab === "share" && (
+                  <Share
+                    sharedItems={sharedItems}                   
+                  />
+                )}
+
+                {activeTab === "about" && <About />}
+
+                {/* Only render MessageInput for chat tab */}
+                {activeTab === "chat" && (
+                  <CustomMessageInput
+                    addSharedItem={addSharedItem} 
+                    updateSharedItems={updateSharedItems}
+                  />
+                )}
+              </Window>
+              <Thread />
+            </Channel>
+          </div>
+        </SidebarProvider>
+      </div>
+      {showCreateGroupModal && (
+        <CreateGroupModal
+          client={client}
+          onClose={() => setShowCreateGroupModal(false)}
+        />
+      )}
+    </Chat>
   );
 }
