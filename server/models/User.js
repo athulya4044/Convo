@@ -32,6 +32,15 @@ const userSchema = new mongoose.Schema(
       enum: ["online", "offline", "away"],
       default: "offline",
     },
+    type: {
+      type: String,
+      enum: ["regular", "premium"],
+      default: "regular",
+    },
+    subscriptionId: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );

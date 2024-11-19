@@ -92,6 +92,7 @@ function Auth() {
       await login({
         email: formState.email,
         streamToken: response.data.streamToken,
+        userType: response.data.user.type,
       });
       navigate("/dashboard");
     } catch (err) {

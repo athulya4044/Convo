@@ -9,6 +9,7 @@ import {
   sendUserOTP,
   verifyUserOTP,
   updateUser,
+  purchaseSubscription,
 } from "../controllers/userController.js";
 
 const router = express.Router();
@@ -36,6 +37,9 @@ router.post("/verify-otp", verifyUserOTP);
 
 // update a user
 router.post("/update", updateUser);
+
+// purchase subscription
+router.post("/payment", purchaseSubscription);
 
 // Get all users
 router.get("/", getAllUsers);

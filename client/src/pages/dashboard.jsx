@@ -20,8 +20,10 @@ import { AppContext } from "@/utils/store/appContext";
 import SidebarMenu from "../components/dashboard/SideBarMenu";
 import CreateGroupModal from "../components/dashboard/CreateGroupModal";
 import CustomChannelHeader from "@/components/dashboard/CustomChannelHeader";
-import { Link } from "react-router-dom";
 import PremiumModal from "@/components/dashboard/PremiumModal";
+import Payment from "../components/dashboard/PaymentModal";
+import { Button } from "@/components/ui/button";
+import SuccessModal from "@/components/dashboard/SuccessModal";
 
 // create / get ai chat for every user
 async function getOrCreateConvoAIChannel(userId, client) {
@@ -39,6 +41,8 @@ export default function Dashboard() {
   const _ctx = useContext(AppContext);
   const [client, setClient] = useState(null);
   const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const userId = stripSpecialCharacters(_ctx.email);
   const userToken = _ctx.streamToken;
@@ -91,20 +95,32 @@ export default function Dashboard() {
 
   return (
     <>
-      {_ctx.userType === "regular" && <PremiumModal />}
-      <Alert className="flex flex-row justify-start gap-1 items-center w-full bg-secondary">
-        <Info className="h-4 w-4" />
-        <AlertDescription>
-          Unlock exclusive features and elevate your experience – upgrade to
-          Convo Premium today !{" "}
-          <Link className="font-bold text-primary underline" to={"/"}>
-            Get started here
-          </Link>
-        </AlertDescription>
-      </Alert>
+      {_ctx.userType !== "premium" && (
+        <PremiumModal setShowPaymentModal={() => setShowPaymentModal(true)} />
+      )}
+      {_ctx.userType !== "premium" && (
+        <Alert className="flex items-start gap-2 w-full bg-secondary p-3">
+          <Info className="h-5 w-5 mt-0.5 flex-shrink-0" />
+          <AlertDescription className="flex-grow">
+            Unlock exclusive features and elevate your experience – upgrade to
+            Convo Premium today!{" "}
+            <Button
+              variant="ghost"
+              className="px-1 font-bold text-primary underline hover:bg-transparent hover:text-primary"
+              onClick={() => setShowPaymentModal(true)}
+            >
+              Get started here
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
       <Chat client={client} theme="messaging light">
-        {/* make this 92vh resizable */}
-        <div className="flex h-[92vh] bg-white">
+        {/* make this 90vh resizable */}
+        <div
+          className={`flex ${
+            _ctx.userType !== "premium" ? "h-[90vh]" : "h-screen"
+          } bg-white`}
+        >
           <SidebarProvider>
             <SidebarMenu
               client={client}
@@ -132,6 +148,15 @@ export default function Dashboard() {
           />
         )}
       </Chat>
+      <Payment
+        isOpen={showPaymentModal}
+        setIsOpen={() => setShowPaymentModal(false)}
+        setShowSuccessModal={() => setShowSuccessModal(true)}
+      />
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+      />
     </>
   );
 }
