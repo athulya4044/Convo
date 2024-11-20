@@ -5,8 +5,7 @@ import {
 } from "stream-chat-react";
 import { Users } from "lucide-react";
 import { logoConvo } from "@/assets/images";
-import { FaVideo } from "react-icons/fa"; // Importing the video call icon
-
+import { FaVideo } from "react-icons/fa";
 export default function CustomChannelHeader({ activeTab, setActiveTab }) {
   const { channel } = useChannelStateContext();
   const { client } = useChatContext();
@@ -76,7 +75,7 @@ export default function CustomChannelHeader({ activeTab, setActiveTab }) {
             onClick={() => setActiveTab(tab)}
             className={`px-4 py-2 text-sm font-medium ${
               activeTab === tab
-                ? "text-blue-500 border-b-2 border-blue-500"
+                ? "text-purple-900 border-b-2 border-purple-900"
                 : "text-gray-500 hover:text-gray-700 border-b-2 border-transparent"
             } focus:outline-none`}
           >

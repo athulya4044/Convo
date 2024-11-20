@@ -25,6 +25,8 @@ import CustomMessage from "../components/dashboard/CustomMessage";
 import About from "../components/chatComponents/About";
 import Share from "../components/chatComponents/Share";
 
+import { Link } from "react-router-dom";
+import PremiumModal from "@/components/dashboard/PremiumModal";
 
 // create / get ai chat for every user
 async function getOrCreateConvoAIChannel(userId, client) {
@@ -47,20 +49,8 @@ export default function Dashboard() {
   const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
   const [activeTab, setActiveTab] = useState("chat"); // State to manage active tab
 
-  //const [sharedItems, setSharedItems] = useState([]);
   const [sharedItems, setSharedItems] = useState({});
 
-  const updateSharedItems = (channelId, items) => {
-    setSharedItems((prevItems) => ({
-      ...prevItems,
-      [channelId]: items,
-    }));
-  };
-
-  // Function to add shared items
-  // const addSharedItem = (item) => {
-  //   setSharedItems((prevItems) => [...prevItems, item]);
-  // };
 
   const addSharedItem = (item, channelId) => {
     setSharedItems((prevItems) => ({
@@ -142,7 +132,7 @@ export default function Dashboard() {
 
                 {activeTab === "share" && (
                   <Share
-                    sharedItems={sharedItems}                   
+                    sharedItems={sharedItems}                  
                   />
                 )}
 
@@ -152,7 +142,6 @@ export default function Dashboard() {
                 {activeTab === "chat" && (
                   <CustomMessageInput
                     addSharedItem={addSharedItem} 
-                    updateSharedItems={updateSharedItems}
                   />
                 )}
               </Window>
@@ -163,9 +152,10 @@ export default function Dashboard() {
       </div>
       {showCreateGroupModal && (
         <CreateGroupModal
-          client={client}
-          onClose={() => setShowCreateGroupModal(false)}
-        />
+        client={client}
+        onClose={() => setShowCreateGroupModal(false)}
+        onGroupCreated={handleGroupCreated}
+      />   
       )}
     </Chat>
   );

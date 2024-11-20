@@ -17,14 +17,4 @@ export const uploadFile = async (file, channelId) => {
   }
 };
 
-export const fetchSharedItemsFromBackend = async (channelId) => {
-  try {
-    const response = await fetch(`http://localhost:4000/shared-items?channelId=${channelId}`);
-    const data = await response.json();
-    return data.items || [];
-  } catch (error) {
-    console.error("Error fetching shared items:", error);
-    return [];
-  }
-};
 

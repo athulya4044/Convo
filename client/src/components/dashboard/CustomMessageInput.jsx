@@ -1,29 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { MessageInput, useChannelStateContext } from 'stream-chat-react';
-//import { uploadFile } from '../../utils/uploadFile';
-import { uploadFile, fetchSharedItemsFromBackend } from '../../utils/uploadFile';
+import { uploadFile } from '../../utils/uploadFile';
 
-function CustomMessageInput({ addSharedItem, updateSharedItems }) {
+function CustomMessageInput({ addSharedItem }) {
   const { channel } = useChannelStateContext();
   const [selectedAttachments, setSelectedAttachments] = useState([]);
-
-  useEffect(() => {
-    const fetchSharedItems = async () => {
-      if (channel) {
-        try {
-          const items = await fetchSharedItemsFromBackend(channel.id);
-          if (items && typeof updateSharedItems === 'function') {
-            updateSharedItems(channel.id, items);
-          }
-        } catch (error) {
-          console.error('Error fetching shared items:', error);
-        }
-      }
-    };
-  
-    fetchSharedItems();
-  }, [channel, updateSharedItems]);
-  
 
   const handleSendMessage = async (message) => {
     if (!channel) {

@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema(
       enum: ["online", "offline", "away"],
       default: "offline",
     },
+    About_me: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true }
 );

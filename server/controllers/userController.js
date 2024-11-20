@@ -82,6 +82,7 @@ export const loginUser = async (req, res) => {
       name: user.name,
       image_url: user.image_url,
       phoneNumber: user.phoneNumber,
+      About_me: user.About_me,
     };
 
     // Upsert user details in Stream Chat
@@ -242,7 +243,7 @@ export const verifyUserOTP = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
-    const { email, name, image_url, phoneNumber } = req.body;
+    const { email, name, image_url, phoneNumber, aboutMe } = req.body;
 
     const user = await User.findOne({ email });
 
@@ -257,6 +258,7 @@ export const updateUser = async (req, res) => {
         name,
         image_url,
         phoneNumber,
+        aboutMe
       },
     });
 
@@ -270,6 +272,7 @@ export const updateUser = async (req, res) => {
       email,
       image_url,
       phoneNumber,
+      aboutMe
     };
 
     // Upsert user details in Stream Chat
