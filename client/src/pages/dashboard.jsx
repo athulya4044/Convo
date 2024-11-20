@@ -21,6 +21,8 @@ import SidebarMenu from "../components/dashboard/SideBarMenu";
 import CreateGroupModal from "../components/dashboard/CreateGroupModal";
 import CustomChannelHeader from "@/components/dashboard/CustomChannelHeader";
 import PremiumModal from "@/components/dashboard/PremiumModal";
+import CustomMessageInput from "../components/dashboard/CustomMessageInput";
+import CustomMessage from "../components/dashboard/CustomMessage";
 import Payment from "../components/dashboard/PaymentModal";
 import { Button } from "@/components/ui/button";
 import SuccessModal from "@/components/dashboard/SuccessModal";
@@ -132,8 +134,8 @@ export default function Dashboard() {
               <Channel EmojiPicker={EmojiPicker}>
                 <Window>
                   <CustomChannelHeader />
-                  <MessageList />
-                  <MessageInput />
+                  <MessageList Input={<CustomMessage />} />
+                  <CustomMessageInput /> 
                 </Window>
                 <Thread />
               </Channel>
