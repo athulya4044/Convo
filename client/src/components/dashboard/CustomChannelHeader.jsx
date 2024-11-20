@@ -60,7 +60,7 @@ export default function CustomChannelHeader({ activeTab, setActiveTab }) {
   }, [client, isOneToOneChat, otherMembers]);
 
   return (
-    <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200">
+    <div className="mt-10 flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200">
       {/* Left Side - Avatar and Display Name */}
       <div className="flex items-center space-x-3">
         <Avatar
