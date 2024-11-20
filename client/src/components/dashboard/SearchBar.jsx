@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2, User, Users, MessageCircle } from "lucide-react";
 
-export default function SearchBar({ client, userId }) {
+export default function SearchBar({ client, userId, navigateToChat }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -27,8 +27,11 @@ export default function SearchBar({ client, userId }) {
             { limit: 5 }
           ),
           client.queryChannels(
-            { name: { $autocomplete: query } },
-            { last_message_at: -1 },
+            {
+              name: { $autocomplete: query },
+              members: { $in: [userId] }, // Ensure the user is a member
+            },
+            [{ last_message_at: -1 }], // Sort descending by last message
             { limit: 5 }
           ),
           client.search({ members: { $in: [userId] } }, query, {
@@ -36,8 +39,13 @@ export default function SearchBar({ client, userId }) {
           }),
         ]);
 
+      // Filter out the current user from the users' search results
+      const filteredUsers = userResponse.users.filter(
+        (user) => user.id !== userId
+      );
+
       setSearchResults({
-        users: userResponse.users || [],
+        users: filteredUsers || [],
         channels: channelResponse || [],
         messages: messageResponse.results || [],
       });
@@ -60,6 +68,15 @@ export default function SearchBar({ client, userId }) {
     setDebounceTimeout(timeout);
   };
 
+  const handleResultClick = (result) => {
+    // Reset the search term and search results
+    setSearchTerm("");
+    setSearchResults(null);
+
+    // Call navigateToChat with the selected result
+    navigateToChat(result);
+  };
+
   const renderResults = () => {
     if (!searchResults) return null;
 
@@ -73,8 +90,12 @@ export default function SearchBar({ client, userId }) {
               <User size={18} /> Users
             </h3>
             {users.map((user) => (
-              <div key={user.id} className="py-2">
-                {user.name || user.id}
+              <div
+                key={user.id}
+                className="flex justify-start items-center cursor-pointer py-2 hover:bg-secondary-foreground"
+                onClick={() => handleResultClick({ channelId: user.id })}
+              >
+                {user.name} - @{user.id}
               </div>
             ))}
           </div>
@@ -85,7 +106,11 @@ export default function SearchBar({ client, userId }) {
               <Users size={18} /> Groups
             </h3>
             {channels.map((channel) => (
-              <div key={channel.id} className="py-2">
+              <div
+                key={channel.id}
+                className="cursor-pointer py-2 hover:bg-secondary-foreground"
+                onClick={() => handleResultClick({ channelId: channel.id })}
+              >
                 {channel.data.name || channel.id}
               </div>
             ))}
@@ -97,7 +122,16 @@ export default function SearchBar({ client, userId }) {
               <MessageCircle size={18} /> Messages
             </h3>
             {messages.map(({ message }) => (
-              <div key={message.id} className="py-2">
+              <div
+                key={message.id}
+                className="py-2 cursor-pointer hover:bg-gray-100"
+                onClick={() =>
+                  handleResultClick({
+                    channelId: message.channel.id,
+                    messageId: message.id,
+                  })
+                }
+              >
                 <strong>{message.user?.name || message.user?.id}: </strong>
                 {message.text}
               </div>
@@ -123,9 +157,9 @@ export default function SearchBar({ client, userId }) {
   }, [debounceTimeout]);
 
   return (
-    <div className="z-10 absolute top-3 ml-4 w-[calc(100vw-22rem)]">
+    <div className="z-10 absolute top-0 ml-4 w-[calc(100vw-22rem)]">
       <Input
-        className="w-full bg-secondary-foreground"
+        className="w-full bg-white border-secondary border-2"
         placeholder="Search for users, groups, or messages"
         value={searchTerm}
         onChange={handleInputChange}

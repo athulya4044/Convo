@@ -36,7 +36,7 @@ export default function CustomChannelHeader({ activeTab, setActiveTab }) {
   );
 
   useEffect(() => {
-    if (isOneToOneChat) {
+    if (isOneToOneChat && !isAIChannel) {
       const updateStatus = () => {
         const lastActive = new Date(otherMembers[0]?.user?.last_active);
         const now = new Date();
@@ -57,7 +57,7 @@ export default function CustomChannelHeader({ activeTab, setActiveTab }) {
         client.off("user.presence.changed", handleUserUpdate);
       };
     }
-  }, [client, isOneToOneChat, otherMembers]);
+  }, [client, isOneToOneChat, otherMembers, isAIChannel]);
 
   return (
     <div className="mt-10 flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200">

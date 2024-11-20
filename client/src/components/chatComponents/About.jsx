@@ -1,7 +1,13 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useChannelStateContext } from "stream-chat-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FaPhoneAlt, FaEnvelope, FaPaperPlane, FaClock,FaCommentDots} from "react-icons/fa";
+import {
+  FaPhoneAlt,
+  FaEnvelope,
+  FaPaperPlane,
+  FaClock,
+  FaCommentDots,
+} from "react-icons/fa";
 
 const About = () => {
   const { channel } = useChannelStateContext();
@@ -21,7 +27,9 @@ const About = () => {
   if (!channel || !channel._client) {
     return (
       <div className="p-4 text-center">
-        <p className="text-gray-500">Loading chat members' information...</p>
+        <p className="text-gray-500">
+          Loading chat members&apos; information...
+        </p>
       </div>
     );
   }
@@ -50,7 +58,9 @@ const About = () => {
   return (
     <div className="p-6 bg-white rounded-lg">
       {!isOneOnOneChat && (
-        <h1 className="text-2xl font-semibold text-gray-900 mb-6">Group Members</h1>
+        <h1 className="text-2xl font-semibold text-gray-900 mb-6">
+          Group Members
+        </h1>
       )}
       {filteredMembers.map((member) => {
         const { user } = member;
@@ -61,7 +71,10 @@ const About = () => {
         const imageUrl = user?.image_url || null;
 
         return (
-          <div key={user?.id} className="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <div
+            key={user?.id}
+            className="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200"
+          >
             <div className="flex items-center space-x-4">
               <Avatar className="h-16 w-16 border-2 border-gray-300 rounded-full shadow-sm">
                 <AvatarImage src={imageUrl} alt={name} />
@@ -84,10 +97,12 @@ const About = () => {
                       <span>{phoneNumber}</span>
                     </div>
                   )}
-                  { aboutMe && (<div className="flex items-center mt-1">
-                    <FaCommentDots className="mr-1 text-gray-500" />
-                    <span>{aboutMe}</span>
-                  </div>) }
+                  {aboutMe && (
+                    <div className="flex items-center mt-1">
+                      <FaCommentDots className="mr-1 text-gray-500" />
+                      <span>{aboutMe}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

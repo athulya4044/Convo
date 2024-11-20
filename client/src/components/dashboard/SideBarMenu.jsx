@@ -21,6 +21,7 @@ export default function SidebarMenu({
   userId,
   logout,
   onShowGroupModal,
+  setActiveChannel,
 }) {
   const [isAccountInfoOpen, setIsAccountInfoOpen] = useState(false);
 
@@ -51,9 +52,14 @@ export default function SidebarMenu({
           className="max-h-full"
           filters={{ members: { $in: [userId] } }}
           sort={{ last_message_at: -1 }}
-          Preview={CustomChannelPreview}
+          Preview={(props) => (
+            <CustomChannelPreview
+              {...props}
+              setActiveChannel={setActiveChannel}
+            />
+          )}
           channelRenderFilterFn={customSort}
-          showChannelSearch
+          // showChannelSearch
         />
       </ScrollArea>
 

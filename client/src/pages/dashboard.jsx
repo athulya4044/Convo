@@ -95,15 +95,31 @@ export default function Dashboard() {
     };
   }, [client, userId, userToken]);
 
-  const navigateToChat = async (channelId, messageId = null) => {
+  const navigateToChat = async ({ channelId, messageId = null }) => {
     if (!client) return;
 
     try {
-      const channel = client.channel("messaging", channelId);
+      // Check for existing channels by ID
+      const existingChannels = await client.queryChannels({
+        id: { $eq: channelId },
+      });
+
+      let channel;
+
+      if (existingChannels.length > 0) {
+        channel = existingChannels[0]; // Use the existing channel
+      } else {
+        // Create a new direct message or group channel
+        channel = client.channel("messaging", channelId, {
+          members: [channelId, client.userID],
+        });
+        await channel.create();
+      }
+
       await channel.watch(); // Ensure the channel is ready
       setActiveChannel(channel);
 
-      // Scroll to the specific message if `messageId` is provided
+      // Scroll to the specific message if provided
       if (messageId) {
         setTimeout(() => {
           const messageElement = document.getElementById(
@@ -115,7 +131,7 @@ export default function Dashboard() {
               behavior: "smooth",
             });
           }
-        }, 300); // Delay to ensure DOM rendering
+        }, 500); // Adjust delay to ensure DOM rendering
       }
     } catch (error) {
       console.error("Error navigating to chat:", error);
@@ -123,9 +139,7 @@ export default function Dashboard() {
   };
 
   const handleGroupCreated = async (newChannel) => {
-    setChannels((prevChannels) => [newChannel, ...prevChannels]);
-    const response = await client.queryChannels({ members: { $in: [userId] } });
-    setChannels(response);
+    setActiveChannel(newChannel);
   };
 
   if (!client)
@@ -141,8 +155,8 @@ export default function Dashboard() {
         <PremiumModal setShowPaymentModal={() => setShowPaymentModal(true)} />
       )}
       {_ctx.userType !== "premium" && (
-        <Alert className="flex items-start gap-2 w-full bg-secondary p-3">
-          <Info className="h-5 w-5 mt-0.5 flex-shrink-0" />
+        <Alert className="flex justify-start items-center gap-2 w-full bg-secondary p-3 py-0">
+          <Info className="top-[0.5rem] left-0 h-5 w-5" />
           <AlertDescription className="flex-grow">
             Unlock exclusive features and elevate your experience – upgrade to
             Convo Premium today!{" "}
@@ -156,10 +170,10 @@ export default function Dashboard() {
           </AlertDescription>
         </Alert>
       )}
-      <Chat client={client} theme="messaging light">
+      <Chat client={client} theme="relative messaging light">
         <div
           className={`flex ${
-            _ctx.userType !== "premium" ? "h-[90vh]" : "h-screen"
+            _ctx.userType !== "premium" ? "h-[94vh]" : "h-screen"
           } bg-white`}
         >
           <SidebarProvider>
@@ -168,9 +182,17 @@ export default function Dashboard() {
               userId={userId}
               onShowGroupModal={() => setShowCreateGroupModal(true)}
               logout={() => _ctx.logout(client)}
+              setActiveChannel={(channel) => {
+                setActiveTab("chat");
+                setActiveChannel(channel);
+              }}
             />
-            <div className="my-3 flex-1 flex flex-col">
-              <SearchBar client={client} userId={userId} />
+            <div className="relative my-3 flex-1 flex flex-col" ref={chatContainerRef}>
+              <SearchBar
+                client={client}
+                userId={userId}
+                navigateToChat={navigateToChat}
+              />
               <Channel channel={activeChannel} EmojiPicker={EmojiPicker}>
                 <Window>
                   <CustomChannelHeader

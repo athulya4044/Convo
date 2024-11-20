@@ -1,5 +1,9 @@
 @import "./index.css";
 
+.\[\&\>svg\]\:top-4 > svg {
+  top: 0.5rem !important;
+}
+
 /* preview initials */
 .str-chat__avatar .str-chat__avatar-image {
   background-color: transparent;
