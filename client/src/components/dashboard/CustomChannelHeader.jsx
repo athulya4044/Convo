@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+/* eslint-disable react/prop-types */
+import { useEffect, useState } from "react";
 import {
   Avatar,
   useChannelStateContext,
@@ -26,7 +27,8 @@ export default function CustomChannelHeader({ activeTab, setActiveTab }) {
 
   const isAIChannel = channel.id.includes("convoAI");
 
-  const [status, setStatus] = useState( isOneToOneChat && !isAIChannel
+  const [status, setStatus] = useState(
+    isOneToOneChat && !isAIChannel
       ? otherMembers[0]?.user?.online
         ? "Online"
         : "Offline"
@@ -39,7 +41,7 @@ export default function CustomChannelHeader({ activeTab, setActiveTab }) {
         const lastActive = new Date(otherMembers[0]?.user?.last_active);
         const now = new Date();
         const timeDifference = now - lastActive;
-        const isOnline = timeDifference <= 60 * 1000; 
+        const isOnline = timeDifference <= 60 * 1000;
         setStatus(isOnline ? "Online" : "Offline");
       };
       updateStatus();
@@ -114,7 +116,7 @@ export default function CustomChannelHeader({ activeTab, setActiveTab }) {
       <div className="flex items-center space-x-3 mr-6">
         <button
           className="text-gray-500 hover:text-gray-700 focus:outline-none"
-          onClick={() => alert('Initiate Video Call')} // Replace with your video call handler
+          onClick={() => alert("Initiate Video Call")} // Replace with your video call handler
           title="Start Video Call"
         >
           <FaVideo size={20} />

@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { Card, CardHeader } from "@/components/ui/card";
 import { Avatar, useChatContext } from "stream-chat-react";
 import { logoConvo } from "../../assets/images";

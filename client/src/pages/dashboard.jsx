@@ -1,10 +1,9 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 import { StreamChat } from "stream-chat";
 import {
   Chat,
   Channel,
   Window,
-  MessageInput,
   MessageList,
   Thread,
   LoadingIndicator,
@@ -26,8 +25,9 @@ import CustomMessage from "../components/dashboard/CustomMessage";
 import Payment from "../components/dashboard/PaymentModal";
 import { Button } from "@/components/ui/button";
 import SuccessModal from "@/components/dashboard/SuccessModal";
-import About from "../components/chatComponents/About";
-import Share from "../components/chatComponents/Share";
+import Share from "@/components/chatComponents/Share";
+import About from "@/components/chatComponents/About";
+import SearchBar from "@/components/dashboard/SearchBar";
 
 // create / get ai chat for every user
 async function getOrCreateConvoAIChannel(userId, client) {
@@ -44,15 +44,18 @@ async function getOrCreateConvoAIChannel(userId, client) {
 export default function Dashboard() {
   const _ctx = useContext(AppContext);
   const [client, setClient] = useState(null);
+  const [activeChannel, setActiveChannel] = useState(null);
   const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [activeTab, setActiveTab] = useState("chat"); 
+  const [activeTab, setActiveTab] = useState("chat");
+  const chatContainerRef = useRef(null);
   const [sharedItems, setSharedItems] = useState({});
+
   const addSharedItem = (item, channelId) => {
     setSharedItems((prevItems) => ({
       ...prevItems,
-      [channelId]: [...(prevItems[channelId] || []), item], 
+      [channelId]: [...(prevItems[channelId] || []), item],
     }));
   };
 
@@ -91,6 +94,33 @@ export default function Dashboard() {
       if (client) client.disconnectUser();
     };
   }, [client, userId, userToken]);
+
+  const navigateToChat = async (channelId, messageId = null) => {
+    if (!client) return;
+
+    try {
+      const channel = client.channel("messaging", channelId);
+      await channel.watch(); // Ensure the channel is ready
+      setActiveChannel(channel);
+
+      // Scroll to the specific message if `messageId` is provided
+      if (messageId) {
+        setTimeout(() => {
+          const messageElement = document.getElementById(
+            `message-${messageId}`
+          );
+          if (messageElement && chatContainerRef.current) {
+            chatContainerRef.current.scrollTo({
+              top: messageElement.offsetTop - 50,
+              behavior: "smooth",
+            });
+          }
+        }, 300); // Delay to ensure DOM rendering
+      }
+    } catch (error) {
+      console.error("Error navigating to chat:", error);
+    }
+  };
 
   const handleGroupCreated = async (newChannel) => {
     setChannels((prevChannels) => [newChannel, ...prevChannels]);
@@ -140,43 +170,38 @@ export default function Dashboard() {
               logout={() => _ctx.logout(client)}
             />
             <div className="my-3 flex-1 flex flex-col">
-              <Channel EmojiPicker={EmojiPicker}>
+              <SearchBar client={client} userId={userId} />
+              <Channel channel={activeChannel} EmojiPicker={EmojiPicker}>
                 <Window>
                   <CustomChannelHeader
-                  activeTab={activeTab}
-                  setActiveTab={setActiveTab} />
-                {activeTab === "chat" && (
-                  <MessageList
-                    Message={(props) => <CustomMessage {...props} />}
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
                   />
-                )}
+                  {activeTab === "chat" && (
+                    <MessageList
+                      Message={(props) => <CustomMessage {...props} />}
+                    />
+                  )}
 
-                {activeTab === "share" && (
-                  <Share
-                    sharedItems={sharedItems}                  
-                  />
-                )}
+                  {activeTab === "share" && <Share sharedItems={sharedItems} />}
 
-                {activeTab === "about" && <About />}
+                  {activeTab === "about" && <About />}
 
-                {activeTab === "chat" && (
-                  <CustomMessageInput
-                    addSharedItem={addSharedItem} 
-                  />
-                )}
+                  {activeTab === "chat" && (
+                    <CustomMessageInput addSharedItem={addSharedItem} />
+                  )}
                 </Window>
                 <Thread />
               </Channel>
             </div>
           </SidebarProvider>
         </div>
-        {showCreateGroupModal && (
-          <CreateGroupModal
-            client={client}
-            onClose={() => setShowCreateGroupModal(false)}
-            onGroupCreated={handleGroupCreated}
-          />
-        )}
+        <CreateGroupModal
+          client={client}
+          isOpen={showCreateGroupModal}
+          onClose={() => setShowCreateGroupModal(false)}
+          onGroupCreated={handleGroupCreated}
+        />
       </Chat>
       <Payment
         isOpen={showPaymentModal}
