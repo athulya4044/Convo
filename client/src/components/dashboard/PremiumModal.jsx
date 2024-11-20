@@ -12,7 +12,7 @@ import {
 import { premium } from "../../assets/images";
 import { CheckCircle, Zap } from "lucide-react";
 
-export default function PremiumDialog() {
+export default function PremiumDialog({ setShowPaymentModal }) {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -21,19 +21,20 @@ export default function PremiumDialog() {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="md:max-w-[30vw]">
+      <DialogContent className="md:max-w-[35vw]">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-center text-2xl font-bold">
+          <DialogTitle className="flex items-center justify-center text-3xl font-bold text-primary">
             Convo Premium
-            <Zap className="ml-2 h-6 w-6" />
+            <Zap className="ml-2 h-6 w-6" color="#4A0080"/>
           </DialogTitle>
-          <DialogDescription className="text-center">
-            Unlock exclusive features and elevate your chat experience
+          <DialogDescription className="text-center text-lg">
+            Unlock exclusive features and elevate your experience
           </DialogDescription>
         </DialogHeader>
         <div className="flex justify-center my-3">
           <img
             src={premium}
+            loading="eager"
             alt="Premium illustration"
             className="w-full h-[200px] object-contain"
           />
@@ -49,8 +50,8 @@ export default function PremiumDialog() {
             className="w-full"
             onClick={() => {
               // Add your subscription logic here
-              console.log("Upgrading to premium...");
               setIsOpen(false);
+              setShowPaymentModal();
             }}
           >
             Upgrade Now for $9.99/month
@@ -61,7 +62,7 @@ export default function PremiumDialog() {
   );
 }
 
-function FeatureItem({ children }) {
+export function FeatureItem({ children }) {
   return (
     <div className="flex items-center space-x-2">
       <CheckCircle className="h-5 w-5 text-green-500" />

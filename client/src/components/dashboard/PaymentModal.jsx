@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   Elements,
@@ -7,6 +7,13 @@ import {
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Card,
   CardHeader,
@@ -19,26 +26,46 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Loader2, X } from "lucide-react";
+import axios from "axios";
+import { AppContext } from "@/utils/store/appContext";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_API_KEY);
 
-const ConvoPaymentPage = () => {
+export default function Payment({ isOpen, setIsOpen, setShowSuccessModal }) {
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogContent className="h-[95vh] overflow-y-auto sm:max-w-[425px] md:max-w-[700px] lg:max-w-[75vw]">
+        <Button
+          onClick={setIsOpen}
+          variant="ghost"
+          className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 hover:bg-transparent focus:outline-none disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
+        >
+          <X className="h-4 w-4" />
+          <span className="sr-only">Close</span>
+        </Button>
+        <DialogHeader>
+          <DialogTitle className="text-center text-3xl font-bold text-gray-900">
+            Upgrade to Convo Premium
+          </DialogTitle>
+          <DialogDescription className="text-center">
+            Choose your plan and enjoy premium features
+          </DialogDescription>
+        </DialogHeader>
+        <ConvoPaymentPage
+          setIsOpen={setIsOpen}
+          setShowSuccessModal={setShowSuccessModal}
+        />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+const ConvoPaymentPage = ({ setIsOpen, setShowSuccessModal }) => {
   const [selectedPlan, setSelectedPlan] = useState("monthly");
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <header className="text-center mb-8">
-        <img
-          src="/placeholder.svg?height=50&width=50"
-          alt="Convo Logo"
-          className="mx-auto mb-4"
-        />
-        <h1 className="text-3xl font-bold text-gray-900">
-          Upgrade to Convo Premium
-        </h1>
-      </header>
-
+    <div className="w-full container mx-auto px-6 py-4">
       <div className="grid md:grid-cols-2 gap-6 mb-8">
         <SubscriptionCard
           title="Monthly Plan"
@@ -46,10 +73,11 @@ const ConvoPaymentPage = () => {
           description="Billed monthly"
           isSelected={selectedPlan === "monthly"}
           onClick={() => setSelectedPlan("monthly")}
+          isPopular
         />
         <SubscriptionCard
           title="Annual Plan"
-          price="$5.99"
+          price="$6.99"
           description="per month, billed annually"
           isSelected={selectedPlan === "annual"}
           onClick={() => setSelectedPlan("annual")}
@@ -58,7 +86,11 @@ const ConvoPaymentPage = () => {
       </div>
 
       <Elements stripe={stripePromise}>
-        <CheckoutForm selectedPlan={selectedPlan} />
+        <CheckoutForm
+          selectedPlan={selectedPlan}
+          setIsOpen={setIsOpen}
+          setShowSuccessModal={setShowSuccessModal}
+        />
       </Elements>
     </div>
   );
@@ -71,6 +103,7 @@ const SubscriptionCard = ({
   isSelected,
   onClick,
   isBestValue,
+  isPopular,
 }) => (
   <Card
     className={`cursor-pointer transition-all ${
@@ -86,6 +119,11 @@ const SubscriptionCard = ({
             Best Value
           </span>
         )}
+        {isPopular && (
+          <span className="bg-secondary text-primary text-xs font-semibold px-2.5 py-0.5 rounded">
+            Popular
+          </span>
+        )}
       </CardTitle>
       <CardDescription>
         <span className="text-2xl font-bold">{price}</span> {description}
@@ -93,6 +131,7 @@ const SubscriptionCard = ({
     </CardHeader>
     <CardContent>
       <ul className="list-disc list-inside">
+        <li>Video Calling</li>
         <li>Unlimited group chats</li>
         <li>Advanced AI assistant</li>
         <li>Priority support</li>
@@ -106,7 +145,8 @@ const SubscriptionCard = ({
   </Card>
 );
 
-const CheckoutForm = ({ selectedPlan }) => {
+const CheckoutForm = ({ selectedPlan, setIsOpen, setShowSuccessModal }) => {
+  const _ctx = useContext(AppContext);
   const stripe = useStripe();
   const elements = useElements();
   const { toast } = useToast();
@@ -123,9 +163,11 @@ const CheckoutForm = ({ selectedPlan }) => {
 
     setLoading(true);
 
+    const cardElement = elements.getElement(CardElement);
+
     const { error, paymentMethod } = await stripe.createPaymentMethod({
       type: "card",
-      card: elements.getElement(CardElement),
+      card: cardElement,
       billing_details: {
         name,
         email,
@@ -139,18 +181,36 @@ const CheckoutForm = ({ selectedPlan }) => {
         description: error.message,
         variant: "destructive",
       });
-    } else {
-      // Here you would typically send the paymentMethod.id to your server
-      console.log("PaymentMethod:", paymentMethod);
+      return;
+    }
 
-      // Simulating a server response
-      setTimeout(() => {
-        setLoading(false);
-        toast({
-          title: "Payment successful",
-          description: `You've been upgraded to Convo Premium (${selectedPlan} plan)!`,
+    try {
+      // Send payment method and other details to your server
+      const response = await axios.post(
+        "http://localhost:4000/api/users/payment",
+        {
+          paymentMethodId: paymentMethod.id,
+          email,
+          plan: selectedPlan,
+        }
+      );
+
+      if (response.data.success) {
+        console.log("success");
+
+        _ctx.login({
+          email: _ctx.email,
+          streamToken: _ctx.streamToken,
+          userType: "premium",
         });
-      }, 2000);
+        setLoading(false);
+        setIsOpen();
+        setShowSuccessModal();
+      }
+    } catch (serverError) {
+      console.error("Server error:", serverError);
+      setLoading(false);
+      setIsOpen();
     }
   };
 
@@ -205,11 +265,9 @@ const CheckoutForm = ({ selectedPlan }) => {
             Processing...
           </>
         ) : (
-          `Pay ${selectedPlan === "monthly" ? "$9.99" : "$71.88"} and Upgrade`
+          `Pay ${selectedPlan === "monthly" ? "$9.99" : "$83.88"} and Upgrade`
         )}
       </Button>
     </form>
   );
 };
-
-export default ConvoPaymentPage;

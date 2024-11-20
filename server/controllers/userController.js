@@ -4,6 +4,7 @@ import twilio from "twilio";
 import { sendPasswordResetEmail } from "../utilities/sendEmail.js";
 import { StreamChat } from "stream-chat";
 import stripSpecialCharacters from "../utilities/stripSpecialCharacters.js";
+import Stripe from "stripe";
 
 // init twilio
 const twilioClient = new twilio(
@@ -18,6 +19,9 @@ const streamServerClient = StreamChat.getInstance(
   streamApiKey,
   streamApiSecret
 );
+
+// init stripe
+const stripe = new Stripe(process.env.STRIPE_API_KEY);
 
 // Register a new user
 export const registerUser = async (req, res) => {
@@ -282,5 +286,53 @@ export const updateUser = async (req, res) => {
   } catch (error) {
     console.log(error);
     return res.status(200).json({ error: "Error updating user" });
+  }
+};
+
+export const purchaseSubscription = async (req, res) => {
+  const { paymentMethodId, email, plan } = req.body;
+
+  try {
+    // Create a customer
+    const customer = await stripe.customers.create({
+      email,
+      payment_method: paymentMethodId,
+      invoice_settings: {
+        default_payment_method: paymentMethodId,
+      },
+    });
+
+    // Select the appropriate price ID based on the plan
+    const priceId =
+      plan === "monthly"
+        ? "price_1QMbReHP5U9UTpUiliMS4xjo"
+        : "price_1QMbSCHP5U9UTpUi9LPlaAQF";
+
+    // Create a subscription
+    const subscription = await stripe.subscriptions.create({
+      customer: customer.id,
+      items: [{ price: priceId }],
+      expand: ["latest_invoice.payment_intent"],
+    });
+
+    // update user
+    const user = await User.findOneAndUpdate(
+      { email },
+      {
+        $set: {
+          type: "premium",
+          subscriptionId: subscription.id,
+        },
+      },
+      { returnDocument: "after" }
+    );
+
+    return res.status(200).json({
+      success: true,
+      userType: user.type,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error: { message: error.message } });
   }
 };

@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import {
   Avatar,
   useChannelStateContext,
@@ -25,11 +26,36 @@ export default function CustomChannelHeader({ activeTab, setActiveTab }) {
 
   const isAIChannel = channel.id.includes("convoAI");
 
-  const status = isOneToOneChat && !isAIChannel
+  const [status, setStatus] = useState( isOneToOneChat && !isAIChannel
       ? otherMembers[0]?.user?.online
         ? "Online"
         : "Offline"
-      : null;
+      : null
+  );
+
+  useEffect(() => {
+    if (isOneToOneChat) {
+      const updateStatus = () => {
+        const lastActive = new Date(otherMembers[0]?.user?.last_active);
+        const now = new Date();
+        const timeDifference = now - lastActive;
+        const isOnline = timeDifference <= 60 * 1000; 
+        setStatus(isOnline ? "Online" : "Offline");
+      };
+      updateStatus();
+      const handleUserUpdate = (event) => {
+        if (event.user.id === otherMembers[0]?.user?.id) {
+          updateStatus();
+        }
+      };
+      client.on("user.updated", handleUserUpdate);
+      client.on("user.presence.changed", handleUserUpdate);
+      return () => {
+        client.off("user.updated", handleUserUpdate);
+        client.off("user.presence.changed", handleUserUpdate);
+      };
+    }
+  }, [client, isOneToOneChat, otherMembers]);
 
   return (
     <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200">

@@ -20,13 +20,14 @@ import { AppContext } from "@/utils/store/appContext";
 import SidebarMenu from "../components/dashboard/SideBarMenu";
 import CreateGroupModal from "../components/dashboard/CreateGroupModal";
 import CustomChannelHeader from "@/components/dashboard/CustomChannelHeader";
+import PremiumModal from "@/components/dashboard/PremiumModal";
 import CustomMessageInput from "../components/dashboard/CustomMessageInput";
 import CustomMessage from "../components/dashboard/CustomMessage";
+import Payment from "../components/dashboard/PaymentModal";
+import { Button } from "@/components/ui/button";
+import SuccessModal from "@/components/dashboard/SuccessModal";
 import About from "../components/chatComponents/About";
 import Share from "../components/chatComponents/Share";
-
-import { Link } from "react-router-dom";
-import PremiumModal from "@/components/dashboard/PremiumModal";
 
 // create / get ai chat for every user
 async function getOrCreateConvoAIChannel(userId, client) {
@@ -40,18 +41,14 @@ async function getOrCreateConvoAIChannel(userId, client) {
   return channel;
 }
 
-
-//const apiKey = "g6dm9he8gx4q";
-
 export default function Dashboard() {
   const _ctx = useContext(AppContext);
   const [client, setClient] = useState(null);
   const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
-  const [activeTab, setActiveTab] = useState("chat"); // State to manage active tab
-
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [activeTab, setActiveTab] = useState("chat"); 
   const [sharedItems, setSharedItems] = useState({});
-
-
   const addSharedItem = (item, channelId) => {
     setSharedItems((prevItems) => ({
       ...prevItems,
@@ -59,17 +56,21 @@ export default function Dashboard() {
     }));
   };
 
-
   const userId = stripSpecialCharacters(_ctx.email);
   const userToken = _ctx.streamToken;
 
   useEffect(() => {
     const initChat = async () => {
-      const chatClient = StreamChat.getInstance(import.meta.env.VITE_STREAM_API_KEY);
+      const chatClient = StreamChat.getInstance(
+        import.meta.env.VITE_STREAM_API_KEY
+      );
       await chatClient.connectUser({ id: userId }, userToken);
       setClient(chatClient);
 
-      const convoAIChannel = await getOrCreateConvoAIChannel(userId, chatClient);
+      const convoAIChannel = await getOrCreateConvoAIChannel(
+        userId,
+        chatClient
+      );
       if (!convoAIChannel.hasListener) {
         convoAIChannel.on("message.new", async (event) => {
           const newMessage = event.message;
@@ -105,25 +106,45 @@ export default function Dashboard() {
     );
 
   return (
-    <Chat client={client} theme="messaging light">
-      <div className="flex h-screen bg-white">
-        <SidebarProvider>
-          <SidebarMenu
-            client={client}
-            userId={userId}
-            onShowGroupModal={() => setShowCreateGroupModal(true)}
-            logout={() => _ctx.logout(client)}
-          />
-          <div className="my-3 flex-1 flex flex-col">
-            <Channel EmojiPicker={EmojiPicker}>
-              <Window>
-                {/* Pass activeTab and setActiveTab to CustomChannelHeader */}
-                <CustomChannelHeader
+    <>
+      {_ctx.userType !== "premium" && (
+        <PremiumModal setShowPaymentModal={() => setShowPaymentModal(true)} />
+      )}
+      {_ctx.userType !== "premium" && (
+        <Alert className="flex items-start gap-2 w-full bg-secondary p-3">
+          <Info className="h-5 w-5 mt-0.5 flex-shrink-0" />
+          <AlertDescription className="flex-grow">
+            Unlock exclusive features and elevate your experience – upgrade to
+            Convo Premium today!{" "}
+            <Button
+              variant="ghost"
+              className="px-1 font-bold text-primary underline hover:bg-transparent hover:text-primary"
+              onClick={() => setShowPaymentModal(true)}
+            >
+              Get started here
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+      <Chat client={client} theme="messaging light">
+        <div
+          className={`flex ${
+            _ctx.userType !== "premium" ? "h-[90vh]" : "h-screen"
+          } bg-white`}
+        >
+          <SidebarProvider>
+            <SidebarMenu
+              client={client}
+              userId={userId}
+              onShowGroupModal={() => setShowCreateGroupModal(true)}
+              logout={() => _ctx.logout(client)}
+            />
+            <div className="my-3 flex-1 flex flex-col">
+              <Channel EmojiPicker={EmojiPicker}>
+                <Window>
+                  <CustomChannelHeader
                   activeTab={activeTab}
-                  setActiveTab={setActiveTab}
-                />
-
-                {/* Conditional rendering based on activeTab */}
+                  setActiveTab={setActiveTab} />
                 {activeTab === "chat" && (
                   <MessageList
                     Message={(props) => <CustomMessage {...props} />}
@@ -138,25 +159,34 @@ export default function Dashboard() {
 
                 {activeTab === "about" && <About />}
 
-                {/* Only render MessageInput for chat tab */}
                 {activeTab === "chat" && (
                   <CustomMessageInput
                     addSharedItem={addSharedItem} 
                   />
                 )}
-              </Window>
-              <Thread />
-            </Channel>
-          </div>
-        </SidebarProvider>
-      </div>
-      {showCreateGroupModal && (
-        <CreateGroupModal
-        client={client}
-        onClose={() => setShowCreateGroupModal(false)}
-        onGroupCreated={handleGroupCreated}
-      />   
-      )}
-    </Chat>
+                </Window>
+                <Thread />
+              </Channel>
+            </div>
+          </SidebarProvider>
+        </div>
+        {showCreateGroupModal && (
+          <CreateGroupModal
+            client={client}
+            onClose={() => setShowCreateGroupModal(false)}
+            onGroupCreated={handleGroupCreated}
+          />
+        )}
+      </Chat>
+      <Payment
+        isOpen={showPaymentModal}
+        setIsOpen={() => setShowPaymentModal(false)}
+        setShowSuccessModal={() => setShowSuccessModal(true)}
+      />
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+      />
+    </>
   );
 }
