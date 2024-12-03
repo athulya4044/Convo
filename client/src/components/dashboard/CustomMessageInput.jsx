@@ -1,6 +1,10 @@
-import { useState } from 'react';
-import { MessageInput, useChannelStateContext } from 'stream-chat-react';
-import { uploadFile } from '../../utils/uploadFile';
+import { useState } from "react";
+import {
+  MessageInput,
+  useChannelStateContext,
+  VirtualizedMessageList,
+} from "stream-chat-react";
+import { uploadFile } from "../../utils/uploadFile";
 
 function CustomMessageInput({ addSharedItem }) {
   const { channel } = useChannelStateContext();
@@ -8,7 +12,7 @@ function CustomMessageInput({ addSharedItem }) {
 
   const handleSendMessage = async (message) => {
     if (!channel) {
-      console.error('Channel not found');
+      console.error("Channel not found");
       return;
     }
 
@@ -19,13 +23,13 @@ function CustomMessageInput({ addSharedItem }) {
           try {
             const s3Url = await uploadFile(file, channel.id);
             return {
-              type: file.type.startsWith('image') ? 'image' : 'file',
+              type: file.type.startsWith("image") ? "image" : "file",
               asset_url: s3Url,
               image_url: s3Url,
               title: file.name,
             };
           } catch (error) {
-            console.error('Image upload failed:', error);
+            console.error("Image upload failed:", error);
             return null;
           }
         })
@@ -34,7 +38,7 @@ function CustomMessageInput({ addSharedItem }) {
     }
 
     const messageData = {
-      text: message.text || '',
+      text: message.text || "",
       attachments,
     };
 
@@ -45,13 +49,15 @@ function CustomMessageInput({ addSharedItem }) {
       // Add the shared items if there are attachments
       if (attachments.length > 0) {
         const channelId = channel.id;
-        attachments.forEach((attachment) => addSharedItem(attachment, channelId));
+        attachments.forEach((attachment) =>
+          addSharedItem(attachment, channelId)
+        );
       }
 
       // Clear selected attachments after sending
       setSelectedAttachments([]);
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error("Error sending message:", error);
     }
   };
 
@@ -61,11 +67,11 @@ function CustomMessageInput({ addSharedItem }) {
         overrideSubmitHandler={handleSendMessage}
         doFileUploadRequest={async (file) => {
           setSelectedAttachments((prev) => [...prev, file]);
-          return { type: 'file', asset_url: '', title: file.name };
+          return { type: "file", asset_url: "", title: file.name };
         }}
         doImageUploadRequest={async (file) => {
           setSelectedAttachments((prev) => [...prev, file]);
-          return { type: 'image', image_url: '', title: file.name };
+          return { type: "image", image_url: "", title: file.name };
         }}
       />
     </div>

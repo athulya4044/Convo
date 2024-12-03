@@ -1,7 +1,10 @@
 import User from "../models/User.js";
 import bcrypt from "bcrypt";
 import twilio from "twilio";
-import { sendPasswordResetEmail } from "../utilities/sendEmail.js";
+import {
+  sendPasswordResetEmail,
+  sendPremiumUpgradeEmail,
+} from "../utilities/sendEmail.js";
 import { StreamChat } from "stream-chat";
 import stripSpecialCharacters from "../utilities/stripSpecialCharacters.js";
 import Stripe from "stripe";
@@ -262,7 +265,7 @@ export const updateUser = async (req, res) => {
         name,
         image_url,
         phoneNumber,
-        aboutMe
+        aboutMe,
       },
     });
 
@@ -276,7 +279,7 @@ export const updateUser = async (req, res) => {
       email,
       image_url,
       phoneNumber,
-      aboutMe
+      aboutMe,
     };
 
     // Upsert user details in Stream Chat
@@ -326,6 +329,10 @@ export const purchaseSubscription = async (req, res) => {
       },
       { returnDocument: "after" }
     );
+
+    // trigger email
+    const userName = stripSpecialCharacters(email);
+    await sendPremiumUpgradeEmail({ email, userName });
 
     return res.status(200).json({
       success: true,

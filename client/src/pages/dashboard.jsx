@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useState, useEffect, useContext, useRef } from "react";
 import { StreamChat } from "stream-chat";
 import {
@@ -6,6 +7,8 @@ import {
   Window,
   MessageList,
   Thread,
+  useActionHandler,
+  Attachment,
   LoadingIndicator,
 } from "stream-chat-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -142,6 +145,48 @@ export default function Dashboard() {
     setActiveChannel(newChannel);
   };
 
+  const CustomAttachmentActions = (props) => {
+    const { actionHandler, actions } = props;
+  
+    const handleClick = async (
+      event,
+      value,
+      name,
+    ) => {
+      try {
+        if (actionHandler) await actionHandler(name, value, event);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+  
+    return (
+      <>
+        {actions.map((action) => (
+          <button key={action} onClick={(event) => handleClick(event, action.value, action.name)}>
+            {action.value}
+          </button>
+        ))}
+      </>
+    );
+  };
+  
+  const CustomGiphyPreview = (props) => {
+    const { message } = props;
+  
+    const handleAction = useActionHandler(message);
+  
+    if (!message.attachments) return null;
+  
+    return (
+      <Attachment
+        actionHandler={handleAction}
+        AttachmentActions={CustomAttachmentActions}
+        attachments={message.attachments}
+      />
+    );
+  };
+
   if (!client)
     return (
       <div className="w-full h-[100%] flex flex-row justify-center items-center">
@@ -187,13 +232,20 @@ export default function Dashboard() {
                 setActiveChannel(channel);
               }}
             />
-            <div className="relative my-3 flex-1 flex flex-col" ref={chatContainerRef}>
+            <div
+              className="relative my-3 flex-1 flex flex-col"
+              ref={chatContainerRef}
+            >
               <SearchBar
                 client={client}
                 userId={userId}
                 navigateToChat={navigateToChat}
               />
-              <Channel channel={activeChannel} EmojiPicker={EmojiPicker}>
+              <Channel
+                GiphyPreviewMessage={CustomGiphyPreview}
+                channel={activeChannel}
+                EmojiPicker={EmojiPicker}
+              >
                 <Window>
                   <CustomChannelHeader
                     activeTab={activeTab}
