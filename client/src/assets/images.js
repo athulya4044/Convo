@@ -15,6 +15,7 @@ import downarrow from "./down arrow.png";
 import bg from "./bg.png";
 import premium from "./premium.png";
 import member from "./member.png";
+import searchBg from "./searchBg.png";
 
 export {
   bg,
@@ -34,4 +35,5 @@ export {
   downarrow,
   premium,
   member,
+  searchBg
 };

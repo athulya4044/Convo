@@ -10,6 +10,7 @@ import { AppContext } from "./utils/store/appContext";
 import Dashboard from "./pages/dashboard";
 import "./App.css";
 import { Toaster } from "./components/ui/toaster";
+import Tutorial from "./pages/tutorial";
 
 const App = () => {
   const { isLoggedIn } = useContext(AppContext);
@@ -19,6 +20,7 @@ const App = () => {
       {isLoggedIn ? (
         // Show only the Dashboard without Header and Footer when logged in
         <Routes>
+          <Route path="/learning-hub" element={<Tutorial />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="*" element={<Navigate replace to="/dashboard" />} />
         </Routes>
