@@ -21,10 +21,22 @@ export default function Tutorial() {
   const [collapsedSections, setCollapsedSections] = useState({});
   const [videoData, setVideoData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [overflowState, setOverflowState] = useState({});
 
   const scrollContainerRefs = useRef({});
 
   const categories = ["All", ...playlists.map((playlist) => playlist.category)];
+
+  const updateOverflowState = () => {
+    const newOverflowState = {};
+    Object.keys(scrollContainerRefs.current).forEach((key) => {
+      const ref = scrollContainerRefs.current[key];
+      if (ref) {
+        newOverflowState[key] = ref.scrollWidth > ref.clientWidth;
+      }
+    });
+    setOverflowState(newOverflowState);
+  };
 
   useEffect(() => {
     const fetchPlaylists = async () => {
@@ -85,6 +97,15 @@ export default function Tutorial() {
     fetchPlaylists();
   }, []);
 
+  useEffect(() => {
+    updateOverflowState();
+    window.addEventListener("resize", updateOverflowState);
+
+    return () => {
+      window.removeEventListener("resize", updateOverflowState);
+    };
+  }, [videoData]);
+
   const handleSearch = (e) => setSearchTerm(e.target.value);
 
   const handleToggleSection = (title) => {
@@ -104,11 +125,6 @@ export default function Tutorial() {
     if (ref) {
       ref.scrollBy({ left: 300, behavior: "smooth" });
     }
-  };
-
-  const checkOverflow = (ref) => {
-    if (!ref) return false;
-    return ref.scrollWidth > ref.clientWidth;
   };
 
   const filteredCollections = videoData
@@ -207,7 +223,7 @@ export default function Tutorial() {
                 {!collapsedSections[collection.title] && (
                   <CardContent className="p-4">
                     <div className="relative group">
-                      {checkOverflow(scrollContainerRefs.current[collection.title]) && (
+                      {overflowState[collection.title] && (
                         <button
                           className="hidden group-hover:block absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-primary text-white rounded-full p-2 shadow-md"
                           onClick={() =>
@@ -240,7 +256,7 @@ export default function Tutorial() {
                           </Card>
                         ))}
                       </div>
-                      {checkOverflow(scrollContainerRefs.current[collection.title]) && (
+                      {overflowState[collection.title] && (
                         <button
                           className="hidden group-hover:block absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-primary text-white rounded-full p-2 shadow-md"
                           onClick={() =>
