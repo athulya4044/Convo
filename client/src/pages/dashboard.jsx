@@ -96,46 +96,6 @@ export default function Dashboard() {
     };
   }, [client, userId, userToken]);
 
-  const navigateToChat = async ({ channelId, messageId = null }) => {
-    if (!client) return;
-
-    try {
-      const existingChannels = await client.queryChannels({
-        id: { $eq: channelId },
-      });
-
-      let channel;
-
-      if (existingChannels.length > 0) {
-        channel = existingChannels[0];
-      } else {
-        channel = client.channel("messaging", channelId, {
-          members: [channelId, client.userID],
-        });
-        await channel.create();
-      }
-
-      await channel.watch();
-      setActiveChannel(channel);
-
-      if (messageId) {
-        setTimeout(() => {
-          const messageElement = document.getElementById(
-            `message-${messageId}`
-          );
-          if (messageElement && chatContainerRef.current) {
-            chatContainerRef.current.scrollTo({
-              top: messageElement.offsetTop - 50,
-              behavior: "smooth",
-            });
-          }
-        }, 500);
-      }
-    } catch (error) {
-      console.error("Error navigating to chat:", error);
-    }
-  };
-
   const handleGroupCreated = async (newChannel) => {
     setActiveChannel(newChannel);
   };

@@ -17,8 +17,15 @@ export const playlists = [
     {
       category: "Soft Skills",
       subcategories: [
-        { title: "Communication Skills", id: "PLOaeOd121eBEEWP14TYgSnFsvaTIjPD22" },
-        { title: "Teamwork Skills", id: "PL_8cFmSMFiYBgfHPhpJNmvud20x5RM2WT" },
+        { title: "Effective Communication", id: "PLOaeOd121eBEEWP14TYgSnFsvaTIjPD22" },
+        { title: "Teamwork", id: "PL_8cFmSMFiYBgfHPhpJNmvud20x5RM2WT" },
+        { title: "Time Management", id: "PL1O57nCUQ-e8HXQ4sFMhjCWCtB0czLEOP" },
+      ],
+    },
+    {
+      category: "UI/UX Design",
+      subcategories: [
+        { title: "UI/UX Design - Figma Tutorial", id: "PLpKyNBYcYNJec4bUTVZUqxBQF5ezd96RT" },
       ],
     },
 ];

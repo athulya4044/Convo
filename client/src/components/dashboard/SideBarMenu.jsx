@@ -25,7 +25,6 @@ export default function SidebarMenu({
   logout,
   onShowGroupModal,
   setActiveChannel,
-  navigateToChat, // Pass the navigateToChat function
 }) {
   const [isAccountInfoOpen, setIsAccountInfoOpen] = useState(false);
   const navigate = useNavigate();
@@ -39,6 +38,46 @@ export default function SidebarMenu({
       // Default sorting based on last message timestamp
       return b.state.last_message_at - a.state.last_message_at;
     });
+  };
+
+  const navigateToChat = async ({ channelId, messageId = null }) => {
+    if (!client) return;
+
+    try {
+      const existingChannels = await client.queryChannels({
+        id: { $eq: channelId },
+      });
+
+      let channel;
+
+      if (existingChannels.length > 0) {
+        channel = existingChannels[0];
+      } else {
+        channel = client.channel("messaging", channelId, {
+          members: [channelId, client.userID],
+        });
+        await channel.create();
+      }
+
+      await channel.watch();
+      setActiveChannel(channel);
+
+      if (messageId) {
+        setTimeout(() => {
+          const messageElement = document.getElementById(
+            `message-${messageId}`
+          );
+          if (messageElement && chatContainerRef.current) {
+            chatContainerRef.current.scrollTo({
+              top: messageElement.offsetTop - 50,
+              behavior: "smooth",
+            });
+          }
+        }, 500);
+      }
+    } catch (error) {
+      console.error("Error navigating to chat:", error);
+    }
   };
 
   return (
