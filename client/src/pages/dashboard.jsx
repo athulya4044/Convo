@@ -27,9 +27,7 @@ import { Button } from "@/components/ui/button";
 import SuccessModal from "@/components/dashboard/SuccessModal";
 import Share from "@/components/chatComponents/Share";
 import About from "@/components/chatComponents/About";
-import SearchBar from "@/components/dashboard/SearchBar";
 
-// create / get ai chat for every user
 async function getOrCreateConvoAIChannel(userId, client) {
   const channelId = `${userId}_convoAI`;
   const channel = client.channel("messaging", channelId, {
@@ -99,7 +97,6 @@ export default function Dashboard() {
     if (!client) return;
 
     try {
-      // Check for existing channels by ID
       const existingChannels = await client.queryChannels({
         id: { $eq: channelId },
       });
@@ -107,19 +104,17 @@ export default function Dashboard() {
       let channel;
 
       if (existingChannels.length > 0) {
-        channel = existingChannels[0]; // Use the existing channel
+        channel = existingChannels[0];
       } else {
-        // Create a new direct message or group channel
         channel = client.channel("messaging", channelId, {
           members: [channelId, client.userID],
         });
         await channel.create();
       }
 
-      await channel.watch(); // Ensure the channel is ready
+      await channel.watch();
       setActiveChannel(channel);
 
-      // Scroll to the specific message if provided
       if (messageId) {
         setTimeout(() => {
           const messageElement = document.getElementById(
@@ -131,7 +126,7 @@ export default function Dashboard() {
               behavior: "smooth",
             });
           }
-        }, 500); // Adjust delay to ensure DOM rendering
+        }, 500);
       }
     } catch (error) {
       console.error("Error navigating to chat:", error);
@@ -186,13 +181,9 @@ export default function Dashboard() {
                 setActiveTab("chat");
                 setActiveChannel(channel);
               }}
+              navigateToChat={navigateToChat} // Pass navigateToChat function
             />
             <div className="relative my-3 flex-1 flex flex-col" ref={chatContainerRef}>
-              <SearchBar
-                client={client}
-                userId={userId}
-                navigateToChat={navigateToChat}
-              />
               <Channel channel={activeChannel} EmojiPicker={EmojiPicker}>
                 <Window>
                   <CustomChannelHeader

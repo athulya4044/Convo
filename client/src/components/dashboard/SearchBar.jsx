@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, User, Users, MessageCircle } from "lucide-react";
+import { Loader2, User, Users, MessageCircle, Search } from "lucide-react";
 
 export default function SearchBar({ client, userId, navigateToChat }) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -83,7 +83,7 @@ export default function SearchBar({ client, userId, navigateToChat }) {
     const { users, channels, messages } = searchResults;
 
     return (
-      <ScrollArea className="absolute overflow-y-auto top-full left-0 right-0 z-99 mt-1 max-h-96 bg-white border rounded-lg shadow-md">
+      <ScrollArea className="bg-white border rounded-lg shadow-md">
         {users.length > 0 && (
           <div className="p-3 border-b">
             <h3 className="text-lg font-semibold flex items-center gap-2">
@@ -157,18 +157,21 @@ export default function SearchBar({ client, userId, navigateToChat }) {
   }, [debounceTimeout]);
 
   return (
-    <div className="z-10 absolute top-0 ml-4 w-[calc(100vw-22rem)]">
-      <Input
-        className="w-full bg-white border-secondary border-2"
-        placeholder="Search for users, groups, or messages"
-        value={searchTerm}
-        onChange={handleInputChange}
-      />
-      {loading && (
-        <div className="absolute right-4 top-2.5">
-          <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
-        </div>
-      )}
+    <div className="relative">
+      <div className="relative flex items-center">
+        <Search className="absolute left-3 text-gray-500" size={18} />
+        <Input
+          className="w-full pl-10 bg-white border-secondary border-2"
+          placeholder="Search for users, groups, or messages"
+          value={searchTerm}
+          onChange={handleInputChange}
+        />
+        {loading && (
+          <div className="absolute right-4">
+            <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
+          </div>
+        )}
+      </div>
       {renderResults()}
     </div>
   );

@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-// SideBarMenu.jsx
+// SidebarMenu.jsx
 import { useState } from "react";
 import { ChannelList } from "stream-chat-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -11,10 +11,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import CustomChannelPreview from "./CustomChannelPreview";
-import { LogOut, User, ChevronsDownUp } from "lucide-react";
+import { LogOut, User, ChevronsDownUp, MoreVertical } from "lucide-react";
 import { logoConvo } from "@/assets/images";
+import SearchBar from "@/components/dashboard/SearchBar";
+import CustomChannelPreview from "./CustomChannelPreview";
 import AccountInfo from "./AccountInfo";
+import { useNavigate } from "react-router-dom";
+
 
 export default function SidebarMenu({
   client,
@@ -22,8 +25,10 @@ export default function SidebarMenu({
   logout,
   onShowGroupModal,
   setActiveChannel,
+  navigateToChat, // Pass the navigateToChat function
 }) {
   const [isAccountInfoOpen, setIsAccountInfoOpen] = useState(false);
+  const navigate = useNavigate();
 
   // Custom sorting function to pin the AI channel at the top
   const customSort = (channels) => {
@@ -38,18 +43,46 @@ export default function SidebarMenu({
 
   return (
     <div className="w-80 h-full flex flex-col border-r border-gray-200">
-      <div className="w-full p-4 flex items-center justify-between">
-        <div className="flex flex-row justify-start items-center gap-2 text-lg font-bold text-primary">
+      <div className="p-4 flex items-center justify-between">
+        <div className="flex flex-row items-center gap-2 text-lg font-bold text-primary">
           <img src={logoConvo} alt="Logo" className="h-8 w-auto" />
           CONVO
         </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="p-2 flex items-center justify-center"
+              style={{ color: "hsl(275 100% 25%)" }}
+            >
+              <MoreVertical size={20} strokeWidth={1.5} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={onShowGroupModal}>
+              Create Group
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/learning-hub")}>
+              Learning Hub
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-      <Button className="m-4 p-2" onClick={onShowGroupModal}>
-        Create Group
-      </Button>
+
+      {/* SearchBar */}
+      <div className="sticky top-0 z-20 bg-white p-2 border-b border-gray-300">
+        <SearchBar
+          client={client}
+          userId={userId}
+          navigateToChat={navigateToChat}
+          className="w-3/4 mx-auto" // Set width to 75% and center it
+        />
+      </div>
+
+      {/* Channel List */}
       <ScrollArea className="flex-1">
         <ChannelList
-          className="max-h-full"
+          className="max-h-full my-4"
           filters={{ members: { $in: [userId] } }}
           sort={{ last_message_at: -1 }}
           Preview={(props) => (
@@ -59,10 +92,10 @@ export default function SidebarMenu({
             />
           )}
           channelRenderFilterFn={customSort}
-          // showChannelSearch
         />
       </ScrollArea>
 
+      {/* Account Info Section */}
       <div className="p-4 border-t border-gray-200">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

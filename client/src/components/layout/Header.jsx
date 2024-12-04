@@ -44,15 +44,7 @@ const Header = () => {
                 className="border-transparent border-b-2 border-solid hover:border-primary hover:text-gray-900 ease-in-out duration-200"
                 to={"/dashboard"}
               >
-                Dashboard
-              </Link>
-            )}
-            {isLoggedIn && (
-              <Link
-                className="border-transparent border-b-2 border-solid hover:border-primary hover:text-gray-900 ease-in-out duration-200"
-                to={"/"}
-              >
-                Chats
+                <span className="text-lg">&lt;</span> Back to Chats
               </Link>
             )}
           </nav>
@@ -100,15 +92,7 @@ const Header = () => {
               className="border-transparent border-b-2 border-solid hover:border-primary hover:text-gray-900 ease-in-out duration-200"
               to={"/dashboard"}
             >
-              Dashboard
-            </Link>
-          )}
-          {isLoggedIn && (
-            <Link
-              className="border-transparent border-b-2 border-solid hover:border-primary hover:text-gray-900 ease-in-out duration-200"
-              to={"/"}
-            >
-              Chats
+             <span className="text-lg">&lt;</span> Back to Chats
             </Link>
           )}
           {isLoggedIn && <Button onClick={() => logout()}>Logout</Button>}
