@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,15 +11,79 @@ import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, X } from "lucide-rea
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { searchBg } from "@/assets/images";
-import { tutorialCollections } from "../utils/tutorialCollections";
+import axios from "axios";
+import { playlists } from "../utils/videoPlaylist";
 
 export default function Tutorial() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [collapsedSections, setCollapsedSections] = useState({});
+  const [videoData, setVideoData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const categories = ["All", "Programming", "AI", "Soft Skills", "Web Design"];
+  const scrollContainerRefs = useRef({});
+
+  const categories = ["All", ...playlists.map((playlist) => playlist.category)];
+
+  useEffect(() => {
+    const fetchPlaylists = async () => {
+      setLoading(true);
+      const fetchPromises = [];
+
+      playlists.forEach((playlist) =>
+        playlist.subcategories.forEach((subcategory) => {
+          fetchPromises.push(
+            axios.get(`https://www.googleapis.com/youtube/v3/playlistItems`, {
+              params: {
+                part: "snippet",
+                playlistId: subcategory.id,
+                maxResults: 20,
+                key: import.meta.env.VITE_YOUTUBE_API_KEY,
+              },
+            }).then((response) => ({
+              playlistCategory: playlist.category,
+              subcategoryTitle: subcategory.title,
+              videos: response.data.items.map((item) => ({
+                id: item.snippet.resourceId.videoId,
+                title: item.snippet.title,
+                thumbnail: item.snippet.thumbnails.high.url,
+                description: item.snippet.description,
+              })),
+            }))
+          );
+        })
+      );
+
+      try {
+        const resolvedData = await Promise.all(fetchPromises);
+
+        const groupedData = playlists.map((playlist) => ({
+          category: playlist.category,
+          subcategories: playlist.subcategories.map((subcategory) => {
+            const subcategoryData = resolvedData.find(
+              (data) =>
+                data.playlistCategory === playlist.category &&
+                data.subcategoryTitle === subcategory.title
+            );
+
+            return {
+              title: subcategory.title,
+              videos: subcategoryData ? subcategoryData.videos : [],
+            };
+          }),
+        }));
+
+        setVideoData(groupedData);
+      } catch (error) {
+        console.error("Error fetching playlists:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPlaylists();
+  }, []);
 
   const handleSearch = (e) => setSearchTerm(e.target.value);
 
@@ -29,29 +93,6 @@ export default function Tutorial() {
       [title]: !prevState[title],
     }));
   };
-
-  const filteredCollections = tutorialCollections
-    .filter(
-      (collection) =>
-        selectedCategory === "All" || collection.category === selectedCategory
-    )
-    .map((collection) => ({
-      ...collection,
-      videos: collection.videos.filter((video) =>
-        video.title.toLowerCase().includes(searchTerm.toLowerCase())
-      ),
-    }))
-    .filter(
-      (collection) =>
-        collection.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        collection.videos.length > 0
-    );
-
-  const trendingVideos = tutorialCollections
-    .flatMap((collection) => collection.videos)
-    .filter((video) => video.isTrending);
-
-  const scrollContainerRefs = useRef({});
 
   const scrollLeft = (ref) => {
     if (ref) {
@@ -64,6 +105,26 @@ export default function Tutorial() {
       ref.scrollBy({ left: 300, behavior: "smooth" });
     }
   };
+
+  const checkOverflow = (ref) => {
+    if (!ref) return false;
+    return ref.scrollWidth > ref.clientWidth;
+  };
+
+  const filteredCollections = videoData
+    .filter(
+      (collection) =>
+        selectedCategory === "All" || collection.category === selectedCategory
+    )
+    .flatMap((collection) =>
+      collection.subcategories.map((subcategory) => ({
+        ...subcategory,
+        videos: subcategory.videos.filter((video) =>
+          video.title.toLowerCase().includes(searchTerm.toLowerCase())
+        ),
+      }))
+    )
+    .filter((collection) => collection.videos.length > 0);
 
   return (
     <>
@@ -85,95 +146,49 @@ export default function Tutorial() {
               Access curated educational videos to expand your knowledge and grow your skills.
             </p>
             <div className="flex items-center w-full max-w-45 bg-white rounded-lg shadow-md relative">
-  <Input
-    className="w-full p-3 border-0"
-    placeholder="Search for tutorials"
-    value={searchTerm}
-    onChange={handleSearch}
-  />
-  {searchTerm && (
-    <button
-      className="absolute right-20 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
-      onClick={() => setSearchTerm("")} // Clear the search term
-    >
-      <X size={20} />
-    </button>
-  )}
-  <Button variant="solid" className="bg-primary text-white">
-    Search
-  </Button>
-</div>
-
+              <Input
+                className="w-full p-3 border-0"
+                placeholder="Search for tutorials"
+                value={searchTerm}
+                onChange={handleSearch}
+              />
+              {searchTerm && (
+                <button
+                  className="absolute right-20 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                  onClick={() => setSearchTerm("")}
+                >
+                  <X size={20} />
+                </button>
+              )}
+              <Button variant="solid" className="bg-primary text-white">
+                Search
+              </Button>
+            </div>
           </div>
         </div>
 
         {/* Category Filters */}
         <div className="p-6 flex justify-center space-x-4">
-  {categories.map((category) => (
-    <button
-      key={category}
-      className={`px-4 py-2 rounded-full transition-all duration-200 ${
-        selectedCategory === category
-          ? "bg-primary text-white border border-primary shadow-lg"
-          : "bg-gray-200 text-gray-800 hover:border-primary hover:shadow-lg hover:bg-white"
-      }`}
-      onClick={() => setSelectedCategory(category)}
-    >
-      {category}
-    </button>
-  ))}
-</div>
-
-
-        {/* Trending Videos Section */}
-        {!searchTerm && selectedCategory === "All" && trendingVideos.length > 0 && (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4">Trending Videos</h2>
-            <div className="relative group">
-              <button
-                className="hidden group-hover:block absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-primary text-white rounded-full p-2 shadow-md hover:bg-primary-dark"
-                onClick={() => scrollLeft(scrollContainerRefs.current["trending"])}
-              >
-                <ChevronLeft size={20} />
-              </button>
-              <div
-                ref={(el) => (scrollContainerRefs.current["trending"] = el)}
-                className="flex space-x-4 overflow-x-auto scroll-smooth scrollbar-hide"
-              >
-                {trendingVideos.map((video) => (
-                  <Card
-                    key={video.title}
-                    className="w-64 cursor-pointer hover:shadow-lg flex-shrink-0"
-                    onClick={() => setSelectedVideo(video)}
-                  >
-                    <CardHeader>
-                      <img
-                        src={`https://img.youtube.com/vi/${video.url.split(
-                          "/embed/"
-                        )[1]}/0.jpg`}
-                        alt={video.title}
-                        className="rounded-lg"
-                      />
-                    </CardHeader>
-                    <CardContent>
-                      <CardTitle className="text-base">{video.title}</CardTitle>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-              <button
-                className="hidden group-hover:block absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-primary text-white rounded-full p-2 shadow-md hover:bg-primary-dark"
-                onClick={() => scrollRight(scrollContainerRefs.current["trending"])}
-              >
-                <ChevronRight size={20} />
-              </button>
-            </div>
-          </div>
-        )}
+          {categories.map((category) => (
+            <button
+              key={category}
+              className={`px-4 py-2 rounded-full transition-all duration-200 ${
+                selectedCategory === category
+                  ? "bg-primary text-white border border-primary shadow-lg"
+                  : "bg-gray-200 text-gray-800 hover:border-primary hover:shadow-lg hover:bg-white"
+              }`}
+              onClick={() => setSelectedCategory(category)}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
 
         {/* Tutorial Collections */}
         <div className="p-6">
-          {filteredCollections.length > 0 ? (
+          {loading ? (
+            <div className="text-center text-gray-500 py-8">Loading videos...</div>
+          ) : filteredCollections.length > 0 ? (
             filteredCollections.map((collection) => (
               <Card key={collection.title} className="mb-8">
                 <CardHeader
@@ -191,36 +206,57 @@ export default function Tutorial() {
                 </CardHeader>
                 {!collapsedSections[collection.title] && (
                   <CardContent className="p-4">
-                    <div className="flex space-x-4 overflow-x-auto scroll-smooth scrollbar-hide">
-                      {collection.videos.map((video) => (
-                        <Card
-                          key={video.title}
-                          className="w-64 cursor-pointer hover:shadow-lg flex-shrink-0"
-                          onClick={() => setSelectedVideo(video)}
+                    <div className="relative group">
+                      {checkOverflow(scrollContainerRefs.current[collection.title]) && (
+                        <button
+                          className="hidden group-hover:block absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-primary text-white rounded-full p-2 shadow-md"
+                          onClick={() =>
+                            scrollLeft(scrollContainerRefs.current[collection.title])
+                          }
                         >
-                          <CardHeader>
-                            <img
-                              src={`https://img.youtube.com/vi/${video.url.split(
-                                "/embed/"
-                              )[1]}/0.jpg`}
-                              alt={video.title}
-                              className="rounded-lg"
-                            />
-                          </CardHeader>
-                          <CardContent>
-                            <CardTitle className="text-base">{video.title}</CardTitle>
-                          </CardContent>
-                        </Card>
-                      ))}
+                          <ChevronLeft size={20} />
+                        </button>
+                      )}
+                      <div
+                        ref={(el) => (scrollContainerRefs.current[collection.title] = el)}
+                        className="flex space-x-4 overflow-x-auto scroll-smooth scrollbar-hide"
+                      >
+                        {collection.videos.map((video) => (
+                          <Card
+                            key={video.id}
+                            className="w-64 cursor-pointer hover:shadow-lg flex-shrink-0"
+                            onClick={() => setSelectedVideo(video)}
+                          >
+                            <CardHeader>
+                              <img
+                                src={video.thumbnail}
+                                alt={video.title}
+                                className="rounded-lg"
+                              />
+                            </CardHeader>
+                            <CardContent>
+                              <CardTitle className="text-base">{video.title}</CardTitle>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                      {checkOverflow(scrollContainerRefs.current[collection.title]) && (
+                        <button
+                          className="hidden group-hover:block absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-primary text-white rounded-full p-2 shadow-md"
+                          onClick={() =>
+                            scrollRight(scrollContainerRefs.current[collection.title])
+                          }
+                        >
+                          <ChevronRight size={20} />
+                        </button>
+                      )}
                     </div>
                   </CardContent>
                 )}
               </Card>
             ))
           ) : (
-            <div className="text-center text-lg text-gray-500">
-              No Video Found :(
-            </div>
+            <div className="text-center text-lg text-gray-500">No Video Found :(</div>
           )}
         </div>
 
@@ -236,12 +272,12 @@ export default function Tutorial() {
                   className="text-white hover:text-gray-400"
                   onClick={() => setSelectedVideo(null)}
                 >
-                  <X size={24} />
+                  <X size={20} />
                 </button>
               </div>
               <iframe
                 className="w-full h-96 rounded-lg"
-                src={selectedVideo.url}
+                src={`https://www.youtube.com/embed/${selectedVideo.id}`}
                 frameBorder="0"
                 allowFullScreen
                 title={selectedVideo.title}
