@@ -231,11 +231,6 @@ export default function Dashboard() {
               className="relative my-3 flex-1 flex flex-col"
               ref={chatContainerRef}
             >
-              <SearchBar
-                client={client}
-                userId={userId}
-                navigateToChat={navigateToChat}
-              />
               <Channel
                 GiphyPreviewMessage={CustomGiphyPreview}
                 channel={activeChannel}

@@ -75,7 +75,7 @@ export default function SidebarMenu({
           client={client}
           userId={userId}
           navigateToChat={navigateToChat}
-          className="w-3/4 mx-auto" // Set width to 75% and center it
+          className="w-3/4 mx-auto" 
         />
       </div>
 

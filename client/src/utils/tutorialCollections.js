@@ -11,7 +11,7 @@ export const tutorialCollections = [
         },
         {
           title: "React State Management",
-          url: "https://www.youtube.com/embed/oH1foa8VGpU",
+          url: "https://www.youtube.com/embed/-bEzt5ISACA",
           description: "Master state management in React using Context and Redux.",
           isTrending: false,
         },
@@ -35,7 +35,7 @@ export const tutorialCollections = [
         },
         {
           title: "Advanced JavaScript",
-          url: "https://www.youtube.com/embed/DPnqb74Smug",
+          url: "https://www.youtube.com/embed/R9I85RhI7Cg",
           description: "Deep dive into closures, promises, and async/await.",
           isTrending: true,
         },
@@ -101,19 +101,19 @@ export const tutorialCollections = [
       videos: [
         {
           title: "Effective Communication Skills",
-          url: "https://www.youtube.com/embed/2Yw6dFQBklA?si=nPfIHdeJxH6PSH8l",
+          url: "https://www.youtube.com/embed/2Yw6dFQBklA",
           description: "Learn how to communicate effectively in professional settings.",
           isTrending: true,
         },
         {
           title: "Time Management Tips",
-          url: "https://www.youtube.com/embed/VUKZ8gThmHs",
+          url: "https://www.youtube.com/embed/iONDebHX9qk",
           description: "Discover techniques for managing your time effectively.",
           isTrending: false,
         },
         {
           title: "Leadership Skills for Beginners",
-          url: "https://www.youtube.com/embed/Bg3_Ns3J4rM",
+          url: "https://www.youtube.com/embed/61OzhSrgsd8",
           description: "Develop leadership skills with this step-by-step guide.",
           isTrending: false,
         },
@@ -125,19 +125,19 @@ export const tutorialCollections = [
       videos: [
         {
           title: "UI/UX Design Fundamentals",
-          url: "https://www.youtube.com/embed/_6eUFb_v1-Y",
+          url: "https://www.youtube.com/embed/uwNClNmekGU",
           description: "An introduction to UI/UX design principles and tools.",
           isTrending: false,
         },
         {
           title: "Wireframing with Figma",
-          url: "https://www.youtube.com/embed/8UqOc2_NKDo",
+          url: "https://www.youtube.com/embed/D4NyQ5iOMF0",
           description: "Learn how to create effective wireframes using Figma.",
           isTrending: true,
         },
         {
           title: "Creating Prototypes in Adobe XD",
-          url: "https://www.youtube.com/embed/jz92UXJ0-rU",
+          url: "https://www.youtube.com/embed/tGd3XCnNRkM",
           description: "Master prototyping techniques in Adobe XD.",
           isTrending: false,
         },

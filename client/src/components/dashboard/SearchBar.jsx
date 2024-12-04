@@ -1,8 +1,7 @@
-/* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, User, Users, MessageCircle, Search } from "lucide-react";
+import { Loader2, User, Users, MessageCircle, Search, X } from "lucide-react";
 
 export default function SearchBar({ client, userId, navigateToChat }) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -29,9 +28,9 @@ export default function SearchBar({ client, userId, navigateToChat }) {
           client.queryChannels(
             {
               name: { $autocomplete: query },
-              members: { $in: [userId] }, // Ensure the user is a member
+              members: { $in: [userId] },
             },
-            [{ last_message_at: -1 }], // Sort descending by last message
+            [{ last_message_at: -1 }],
             { limit: 5 }
           ),
           client.search({ members: { $in: [userId] } }, query, {
@@ -39,7 +38,6 @@ export default function SearchBar({ client, userId, navigateToChat }) {
           }),
         ]);
 
-      // Filter out the current user from the users' search results
       const filteredUsers = userResponse.users.filter(
         (user) => user.id !== userId
       );
@@ -60,21 +58,21 @@ export default function SearchBar({ client, userId, navigateToChat }) {
     const query = e.target.value;
     setSearchTerm(query);
 
-    // Clear any existing debounce timeout
     if (debounceTimeout) clearTimeout(debounceTimeout);
 
-    // Set a new debounce timeout
     const timeout = setTimeout(() => handleSearch(query), 300);
     setDebounceTimeout(timeout);
   };
 
   const handleResultClick = (result) => {
-    // Reset the search term and search results
     setSearchTerm("");
     setSearchResults(null);
-
-    // Call navigateToChat with the selected result
     navigateToChat(result);
+  };
+
+  const clearSearch = () => {
+    setSearchTerm("");
+    setSearchResults(null);
   };
 
   const renderResults = () => {
@@ -151,27 +149,34 @@ export default function SearchBar({ client, userId, navigateToChat }) {
 
   useEffect(() => {
     return () => {
-      // Clean up debounce timeout on component unmount
       if (debounceTimeout) clearTimeout(debounceTimeout);
     };
   }, [debounceTimeout]);
 
   return (
     <div className="relative">
-      <div className="relative flex items-center">
-        <Search className="absolute left-3 text-gray-500" size={18} />
-        <Input
-          className="w-full pl-10 bg-white border-secondary border-2"
-          placeholder="Search for users, groups, or messages"
-          value={searchTerm}
-          onChange={handleInputChange}
-        />
-        {loading && (
-          <div className="absolute right-4">
-            <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
-          </div>
-        )}
-      </div>
+   <div className="relative flex items-center">
+  <Search className="absolute left-3 text-gray-500" size={18} />
+  <Input
+    className="w-full pl-10 pr-10 bg-white border-secondary border-2"
+    placeholder="Search for users, groups, or messages"
+    value={searchTerm}
+    onChange={handleInputChange}
+  />
+  {!loading && searchTerm && (
+    <button
+      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+      onClick={clearSearch}
+    >
+      <X size={18} />
+    </button>
+  )}
+  {loading && (
+    <div className="absolute right-4">
+      <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
+    </div>
+  )}
+</div>
       {renderResults()}
     </div>
   );

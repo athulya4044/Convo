@@ -18,11 +18,15 @@ const About = () => {
     if (!lastActive) return "Not available";
     const diff = Date.now() - new Date(lastActive).getTime();
     const minutes = Math.floor(diff / 60000);
+  
     if (minutes < 1) return "Just now";
     if (minutes < 60) return `${minutes} minutes ago`;
     const hours = Math.floor(minutes / 60);
-    return `${hours} hours ago`;
+    if (hours < 24) return `${hours} hours ago`;
+    const days = Math.floor(hours / 24);
+    return days > 2 ? `${days} days ago` : "48+ hours ago";
   };
+  
 
   if (!channel || !channel._client) {
     return (
@@ -78,7 +82,7 @@ const About = () => {
             <div className="flex items-center space-x-4">
               <Avatar className="h-16 w-16 border-2 border-gray-300 rounded-full shadow-sm">
                 <AvatarImage src={imageUrl} alt={name} />
-                <AvatarFallback className="bg-purple-700 text-white rounded-full">
+                <AvatarFallback className="bg-primary text-white rounded-full">
                   {name?.[0] || "?"}
                 </AvatarFallback>
               </Avatar>
@@ -132,11 +136,11 @@ const About = () => {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-          className="w-full border border-gray-300 rounded-lg p-3 pr-12 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-sm"
+          className="w-full border border-gray-300 rounded-lg p-3 pr-12 focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
         />
         <button
           onClick={handleSendMessage}
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-purple-600 text-white p-2 rounded-full hover:bg-purple-700 transition-colors"
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-primary text-white p-2 rounded-full hover:bg-purple-700 transition-colors"
         >
           <FaPaperPlane />
         </button>

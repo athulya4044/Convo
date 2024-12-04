@@ -84,36 +84,46 @@ export default function Tutorial() {
             <p className="text-lg text-primary mb-6">
               Access curated educational videos to expand your knowledge and grow your skills.
             </p>
-            <div className="flex items-center w-full max-w-45 bg-white rounded-lg shadow-md">
-              <Input
-                className="w-full p-3 border-0"
-                placeholder="Search for tutorials"
-                value={searchTerm}
-                onChange={handleSearch}
-              />
-              <Button variant="solid" className="bg-primary text-white">
-                Search
-              </Button>
-            </div>
+            <div className="flex items-center w-full max-w-45 bg-white rounded-lg shadow-md relative">
+  <Input
+    className="w-full p-3 border-0"
+    placeholder="Search for tutorials"
+    value={searchTerm}
+    onChange={handleSearch}
+  />
+  {searchTerm && (
+    <button
+      className="absolute right-20 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+      onClick={() => setSearchTerm("")} // Clear the search term
+    >
+      <X size={20} />
+    </button>
+  )}
+  <Button variant="solid" className="bg-primary text-white">
+    Search
+  </Button>
+</div>
+
           </div>
         </div>
 
         {/* Category Filters */}
         <div className="p-6 flex justify-center space-x-4">
-          {categories.map((category) => (
-            <button
-              key={category}
-              className={`px-4 py-2 rounded-full ${
-                selectedCategory === category
-                  ? "bg-primary text-white"
-                  : "bg-gray-200 text-gray-800"
-              }`}
-              onClick={() => setSelectedCategory(category)}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
+  {categories.map((category) => (
+    <button
+      key={category}
+      className={`px-4 py-2 rounded-full transition-all duration-200 ${
+        selectedCategory === category
+          ? "bg-primary text-white border border-primary shadow-lg"
+          : "bg-gray-200 text-gray-800 hover:border-primary hover:shadow-lg hover:bg-white"
+      }`}
+      onClick={() => setSelectedCategory(category)}
+    >
+      {category}
+    </button>
+  ))}
+</div>
+
 
         {/* Trending Videos Section */}
         {!searchTerm && selectedCategory === "All" && trendingVideos.length > 0 && (

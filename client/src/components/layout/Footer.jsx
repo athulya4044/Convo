@@ -1,4 +1,4 @@
-import { Facebook, Twitter, Github } from 'lucide-react'; // Example icons
+import { Facebook, Twitter, Github } from 'lucide-react'; 
 
 const Footer = () => {
   return (
