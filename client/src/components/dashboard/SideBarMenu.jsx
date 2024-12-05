@@ -1,6 +1,5 @@
 /* eslint-disable react/prop-types */
-// SidebarMenu.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChannelList } from "stream-chat-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -11,13 +10,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User, ChevronsDownUp, MoreVertical } from "lucide-react";
+import {
+  LogOut,
+  User,
+  ChevronsDownUp,
+  MoreVertical,
+  UserPlus,
+  BookOpen,
+  Eye,
+} from "lucide-react"; 
 import { logoConvo } from "@/assets/images";
 import SearchBar from "@/components/dashboard/SearchBar";
 import CustomChannelPreview from "./CustomChannelPreview";
 import AccountInfo from "./AccountInfo";
 import { useNavigate } from "react-router-dom";
-
 
 export default function SidebarMenu({
   client,
@@ -27,56 +33,79 @@ export default function SidebarMenu({
   setActiveChannel,
 }) {
   const [isAccountInfoOpen, setIsAccountInfoOpen] = useState(false);
+  const [isGrayscale, setIsGrayscale] = useState(false); 
   const navigate = useNavigate();
 
-  // Custom sorting function to pin the AI channel at the top
-  const customSort = (channels) => {
-    const aiChannelId = `${userId}_convoAI`;
-    return channels.sort((a, b) => {
-      if (a.id === aiChannelId) return -1; // AI channel goes to the top
-      if (b.id === aiChannelId) return 1;
-      // Default sorting based on last message timestamp
-      return b.state.last_message_at - a.state.last_message_at;
-    });
-  };
-
-  const navigateToChat = async ({ channelId, messageId = null }) => {
-    if (!client) return;
-
-    try {
-      const existingChannels = await client.queryChannels({
-        id: { $eq: channelId },
+    // Custom sorting function to pin the AI channel at the top
+    const customSort = (channels) => {
+      const aiChannelId = `${userId}_convoAI`;
+      return channels.sort((a, b) => {
+        if (a.id === aiChannelId) return -1; // AI channel goes to the top
+        if (b.id === aiChannelId) return 1;
+        // Default sorting based on last message timestamp
+        return b.state.last_message_at - a.state.last_message_at;
       });
-
-      let channel;
-
-      if (existingChannels.length > 0) {
-        channel = existingChannels[0];
-      } else {
-        channel = client.channel("messaging", channelId, {
-          members: [channelId, client.userID],
+    };
+  
+    const navigateToChat = async ({ channelId, messageId = null }) => {
+      if (!client) return;
+  
+      try {
+        const existingChannels = await client.queryChannels({
+          id: { $eq: channelId },
         });
-        await channel.create();
+  
+        let channel;
+  
+        if (existingChannels.length > 0) {
+          channel = existingChannels[0];
+        } else {
+          channel = client.channel("messaging", channelId, {
+            members: [channelId, client.userID],
+          });
+          await channel.create();
+        }
+  
+        await channel.watch();
+        setActiveChannel(channel);
+  
+        if (messageId) {
+          setTimeout(() => {
+            const messageElement = document.getElementById(
+              `message-${messageId}`
+            );
+            if (messageElement && chatContainerRef.current) {
+              chatContainerRef.current.scrollTo({
+                top: messageElement.offsetTop - 50,
+                behavior: "smooth",
+              });
+            }
+          }, 500);
+        }
+      } catch (error) {
+        console.error("Error navigating to chat:", error);
       }
+    };
 
-      await channel.watch();
-      setActiveChannel(channel);
+  // Load grayscale state from localStorage on component mount
+  useEffect(() => {
+    const savedGrayscaleState = localStorage.getItem("isGrayscale") === "true";
+    setIsGrayscale(savedGrayscaleState); 
+    if (savedGrayscaleState) {
+      document.body.classList.add("grayscale"); 
+    } else {
+      document.body.classList.remove("grayscale");
+    }
+  }, []);
 
-      if (messageId) {
-        setTimeout(() => {
-          const messageElement = document.getElementById(
-            `message-${messageId}`
-          );
-          if (messageElement && chatContainerRef.current) {
-            chatContainerRef.current.scrollTo({
-              top: messageElement.offsetTop - 50,
-              behavior: "smooth",
-            });
-          }
-        }, 500);
-      }
-    } catch (error) {
-      console.error("Error navigating to chat:", error);
+  const toggleGrayscale = () => {
+    const newState = !isGrayscale;
+    setIsGrayscale(newState); 
+    localStorage.setItem("isGrayscale", newState); 
+    if (newState) {
+      document.body.classList.add("grayscale");
+    } else {
+      document.body.classList.remove("grayscale");
     }
   };
 
@@ -99,10 +128,31 @@ export default function SidebarMenu({
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem onClick={onShowGroupModal}>
+              <UserPlus className="mr-2 h-4 w-4" />
               Create Group
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/learning-hub")}>
+              <BookOpen className="mr-2 h-4 w-4" />
               Learning Hub
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-2">
+                  <Eye className="h-4 w-4 mr-2"/>
+                    Grayscale
+                </div>
+                <label className="relative inline-flex items-center ml-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={isGrayscale}
+                    onChange={toggleGrayscale}
+                  />
+                  <div className="w-8 h-4 bg-gray-200 rounded-full peer-focus:outline-none peer dark:bg-gray-700 peer-checked:bg-blue-600">
+                    <span className="absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full shadow-md transition-all peer-checked:translate-x-4"></span>
+                  </div>
+                </label>
+              </div>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -114,7 +164,7 @@ export default function SidebarMenu({
           client={client}
           userId={userId}
           navigateToChat={navigateToChat}
-          className="w-3/4 mx-auto" 
+          className="w-3/4 mx-auto"
         />
       </div>
 

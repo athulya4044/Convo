@@ -201,7 +201,7 @@ export default function SearchBar({ client, userId, navigateToChat }) {
         <Search className="absolute left-3 text-gray-500" size={18} />
         <Input
           className="w-full pl-10 pr-10 bg-white border-secondary border-2"
-          placeholder="Search for users,groups,or messages"
+          placeholder="Search for users,groups or messages"
           value={searchTerm}
           onChange={handleInputChange}
         />

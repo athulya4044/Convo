@@ -49,3 +49,7 @@
   display: none; 
 }
 
+body.grayscale {
+  filter: grayscale(100%);
+}
+
