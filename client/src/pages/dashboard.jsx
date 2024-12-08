@@ -30,6 +30,7 @@ import { Button } from "@/components/ui/button";
 import SuccessModal from "@/components/dashboard/SuccessModal";
 import Share from "@/components/chatComponents/Share";
 import About from "@/components/chatComponents/About";
+import VideoCall from "@/components/dashboard/VideoCall";
 
 async function getOrCreateConvoAIChannel(userId, client) {
   const channelId = `${userId}_convoAI`;
@@ -102,37 +103,36 @@ export default function Dashboard() {
 
   const CustomAttachmentActions = (props) => {
     const { actionHandler, actions } = props;
-  
-    const handleClick = async (
-      event,
-      value,
-      name,
-    ) => {
+
+    const handleClick = async (event, value, name) => {
       try {
         if (actionHandler) await actionHandler(name, value, event);
       } catch (err) {
         console.log(err);
       }
     };
-  
+
     return (
       <>
         {actions.map((action) => (
-          <button key={action} onClick={(event) => handleClick(event, action.value, action.name)}>
+          <button
+            key={action}
+            onClick={(event) => handleClick(event, action.value, action.name)}
+          >
             {action.value}
           </button>
         ))}
       </>
     );
   };
-  
+
   const CustomGiphyPreview = (props) => {
     const { message } = props;
-  
+
     const handleAction = useActionHandler(message);
-  
+
     if (!message.attachments) return null;
-  
+
     return (
       <Attachment
         actionHandler={handleAction}
@@ -170,63 +170,71 @@ export default function Dashboard() {
           </AlertDescription>
         </Alert>
       )}
-      <Chat client={client} theme="relative messaging light">
-        <div
-          className={`flex ${
-            _ctx.userType !== "premium" ? "h-[94vh]" : "h-screen"
-          } bg-white`}
-        >
-          <SidebarProvider>
-            <SidebarMenu
-              client={client}
-              userId={userId}
-              onShowGroupModal={() => setShowCreateGroupModal(true)}
-              logout={() => _ctx.logout(client)}
-              setActiveChannel={(channel) => {
-                setActiveTab("chat");
-                setActiveChannel(channel);
-              }}
-            />
-            <div
-              className="relative my-3 flex-1 flex flex-col"
-              ref={chatContainerRef}
-            >
-              <Channel
-                GiphyPreviewMessage={CustomGiphyPreview}
-                channel={activeChannel}
-                EmojiPicker={EmojiPicker}
+      {activeTab === "video" && _ctx.userType === "premium" && <VideoCall />}
+      {activeTab !== "video" ||
+        (_ctx.userType !== "premium" && (
+          <>
+            <Chat client={client} theme="relative messaging light">
+              <div
+                className={`flex ${
+                  _ctx.userType !== "premium" ? "h-[94vh]" : "h-screen"
+                } bg-white`}
               >
-                <Window>
-                  <CustomChannelHeader
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
+                <SidebarProvider>
+                  <SidebarMenu
+                    client={client}
+                    userId={userId}
+                    onShowGroupModal={() => setShowCreateGroupModal(true)}
+                    logout={() => _ctx.logout(client)}
+                    setActiveChannel={(channel) => {
+                      setActiveTab("chat");
+                      setActiveChannel(channel);
+                    }}
                   />
-                  {activeTab === "chat" && (
-                    <MessageList
-                      Message={(props) => <CustomMessage {...props} />}
-                    />
-                  )}
+                  <div
+                    className="relative my-3 flex-1 flex flex-col"
+                    ref={chatContainerRef}
+                  >
+                    <Channel
+                      GiphyPreviewMessage={CustomGiphyPreview}
+                      channel={activeChannel}
+                      EmojiPicker={EmojiPicker}
+                    >
+                      <Window>
+                        <CustomChannelHeader
+                          activeTab={activeTab}
+                          setActiveTab={setActiveTab}
+                        />
+                        {activeTab === "chat" && (
+                          <MessageList
+                            Message={(props) => <CustomMessage {...props} />}
+                          />
+                        )}
 
-                  {activeTab === "share" && <Share sharedItems={sharedItems} />}
+                        {activeTab === "share" && (
+                          <Share sharedItems={sharedItems} />
+                        )}
 
-                  {activeTab === "about" && <About />}
+                        {activeTab === "about" && <About />}
 
-                  {activeTab === "chat" && (
-                    <CustomMessageInput addSharedItem={addSharedItem} />
-                  )}
-                </Window>
-                <Thread />
-              </Channel>
-            </div>
-          </SidebarProvider>
-        </div>
-        <CreateGroupModal
-          client={client}
-          isOpen={showCreateGroupModal}
-          onClose={() => setShowCreateGroupModal(false)}
-          onGroupCreated={handleGroupCreated}
-        />
-      </Chat>
+                        {activeTab === "chat" && (
+                          <CustomMessageInput addSharedItem={addSharedItem} />
+                        )}
+                      </Window>
+                      <Thread />
+                    </Channel>
+                  </div>
+                </SidebarProvider>
+              </div>
+              <CreateGroupModal
+                client={client}
+                isOpen={showCreateGroupModal}
+                onClose={() => setShowCreateGroupModal(false)}
+                onGroupCreated={handleGroupCreated}
+              />
+            </Chat>
+          </>
+        ))}
       <Payment
         isOpen={showPaymentModal}
         setIsOpen={() => setShowPaymentModal(false)}
