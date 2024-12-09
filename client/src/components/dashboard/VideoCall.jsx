@@ -13,6 +13,7 @@ import {
 import { LoadingIndicator } from "stream-chat-react";
 import { useContext } from "react";
 import stripSpecialCharacters from "@/utils/stripSpecialCharacters";
+import "@stream-io/video-react-sdk/dist/css/styles.css";
 
 function VideoCall({ setActiveTab }) {
   const _ctx = useContext(AppContext);
@@ -64,7 +65,7 @@ const MyUILayout = ({ setActiveTab }) => {
   return (
     <StreamTheme>
       <SpeakerLayout participantsBarPosition='bottom' />
-      <CallControls onLeave={setActiveTab}/>
+      <CallControls onLeave={() => setActiveTab("chat")}/>
     </StreamTheme>
   );
 };
