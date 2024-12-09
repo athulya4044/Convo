@@ -30,7 +30,7 @@ function AccountInfo({ isAccountInfoOpen, setIsAccountInfoOpen, client }) {
       setName(client?.user?.name || "");
       setPhoneNumber(client?.user?.phoneNumber || "");
       setAboutMe(client?.user?.aboutMe || "");
-      setImageFile(null);
+      setImageFile(client?.user?.image_url || "");
     }
   };
 
