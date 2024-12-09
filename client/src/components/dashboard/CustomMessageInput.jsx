@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   MessageInput,
   useChannelStateContext,
-  VirtualizedMessageList,
 } from "stream-chat-react";
 import { uploadFile } from "../../utils/uploadFile";
 
