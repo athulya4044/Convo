@@ -46,23 +46,25 @@ export default function Tutorial() {
       playlists.forEach((playlist) =>
         playlist.subcategories.forEach((subcategory) => {
           fetchPromises.push(
-            axios.get(`https://www.googleapis.com/youtube/v3/playlistItems`, {
-              params: {
-                part: "snippet",
-                playlistId: subcategory.id,
-                maxResults: 20,
-                key: import.meta.env.VITE_YOUTUBE_API_KEY,
-              },
-            }).then((response) => ({
-              playlistCategory: playlist.category,
-              subcategoryTitle: subcategory.title,
-              videos: response.data.items.map((item) => ({
-                id: item.snippet.resourceId.videoId,
-                title: item.snippet.title,
-                thumbnail: item.snippet.thumbnails.high.url,
-                description: item.snippet.description,
-              })),
-            }))
+            axios
+              .get(`https://www.googleapis.com/youtube/v3/playlistItems`, {
+                params: {
+                  part: "snippet",
+                  playlistId: subcategory.id,
+                  maxResults: 20,
+                  key: import.meta.env.VITE_YOUTUBE_API_KEY,
+                },
+              })
+              .then((response) => ({
+                playlistCategory: playlist.category,
+                subcategoryTitle: subcategory.title,
+                videos: response.data.items.map((item) => ({
+                  id: item.snippet.resourceId.videoId,
+                  title: item.snippet.title,
+                  thumbnail: item.snippet.thumbnails.high.url,
+                  description: item.snippet.description,
+                })),
+              }))
           );
         })
       );
@@ -154,14 +156,14 @@ export default function Tutorial() {
             height: "37vh",
           }}
         >
-          <div className="relative z-10 text-center">
-            <h1 className="text-4xl font-bold text-primary mb-4">
+          <div className="relative z-10 text-center px-4">
+            <h1 className="text-2xl md:text-4xl font-bold text-primary mb-4">
               Welcome to the Learning Hub
             </h1>
-            <p className="text-lg text-primary mb-6">
+            <p className="text-base md:text-lg text-primary mb-6">
               Access curated educational videos to expand your knowledge and grow your skills.
             </p>
-            <div className="flex items-center w-full max-w-45 bg-white rounded-lg shadow-md relative">
+            <div className="flex items-center w-full max-w-xl mx-auto bg-white rounded-lg shadow-md relative">
               <Input
                 className="w-full p-3 border-0"
                 placeholder="Search for tutorials"
@@ -183,25 +185,29 @@ export default function Tutorial() {
           </div>
         </div>
 
-        {/* Category Filters */}
-        <div className="p-6 flex justify-center space-x-4">
-          {categories.map((category) => (
-            <button
-              key={category}
-              className={`px-4 py-2 rounded-full transition-all duration-200 ${
-                selectedCategory === category
-                  ? "bg-primary text-white border border-primary shadow-lg"
-                  : "bg-gray-200 text-gray-800 hover:border-primary hover:shadow-lg hover:bg-white"
-              }`}
-              onClick={() => setSelectedCategory(category)}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
+   {/* Category Filters */}
+<div className="p-6">
+  <div className="flex flex-wrap justify-center gap-4">
+    {categories.map((category) => (
+      <button
+        key={category}
+        className={`px-4 py-2 rounded-full text-sm md:text-base transition-all duration-200 ${
+          selectedCategory === category
+            ? "bg-primary text-white border border-primary shadow-lg"
+            : "bg-gray-200 text-gray-800 hover:border-primary hover:shadow-lg hover:bg-white"
+        }`}
+        onClick={() => setSelectedCategory(category)}
+      >
+        {category}
+      </button>
+    ))}
+  </div>
+</div>
+
+
 
         {/* Tutorial Collections */}
-        <div className="p-6">
+        <div className="p-4 md:p-6">
           {loading ? (
             <div className="text-center text-gray-500 py-8">Loading videos...</div>
           ) : filteredCollections.length > 0 ? (
@@ -211,7 +217,7 @@ export default function Tutorial() {
                   className="flex items-center justify-between cursor-pointer p-4"
                   onClick={() => handleToggleSection(collection.title)}
                 >
-                  <CardTitle className="text-lg font-medium">
+                  <CardTitle className="text-sm md:text-lg font-medium">
                     {collection.title}
                   </CardTitle>
                   {collapsedSections[collection.title] ? (
@@ -240,7 +246,7 @@ export default function Tutorial() {
                         {collection.videos.map((video) => (
                           <Card
                             key={video.id}
-                            className="w-64 cursor-pointer hover:shadow-lg flex-shrink-0"
+                            className="w-48 md:w-64 cursor-pointer hover:shadow-lg flex-shrink-0"
                             onClick={() => setSelectedVideo(video)}
                           >
                             <CardHeader>
@@ -251,7 +257,9 @@ export default function Tutorial() {
                               />
                             </CardHeader>
                             <CardContent>
-                              <CardTitle className="text-base">{video.title}</CardTitle>
+                              <CardTitle className="text-xs md:text-base">
+                                {video.title}
+                              </CardTitle>
                             </CardContent>
                           </Card>
                         ))}
@@ -272,18 +280,18 @@ export default function Tutorial() {
               </Card>
             ))
           ) : (
-            <div className="text-center text-lg text-gray-500">No Video Found :(</div>
+            <div className="text-center text-sm md:text-lg text-gray-500">No Video Found :(</div>
           )}
         </div>
 
         {/* Fullscreen Video Playback */}
         {selectedVideo && (
-          <div
-            className="fixed inset-0 bg-gray-900 bg-opacity-75 flex justify-center items-center z-50"
-          >
-            <div className="relative w-3/4 max-w-4xl bg-black rounded-lg shadow-lg group">
+          <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex justify-center items-center z-50 p-4">
+            <div className="relative w-full md:w-3/4 max-w-4xl bg-black rounded-lg shadow-lg group">
               <div className="absolute top-0 left-0 right-0 flex justify-between items-center bg-black bg-opacity-50 text-white p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <span className="font-bold">{selectedVideo.title}</span>
+                <span className="font-bold text-sm md:text-base">
+                  {selectedVideo.title}
+                </span>
                 <button
                   className="text-white hover:text-gray-400"
                   onClick={() => setSelectedVideo(null)}
@@ -292,7 +300,7 @@ export default function Tutorial() {
                 </button>
               </div>
               <iframe
-                className="w-full h-96 rounded-lg"
+                className="w-full h-56 md:h-96 rounded-lg"
                 src={`https://www.youtube.com/embed/${selectedVideo.id}`}
                 frameBorder="0"
                 allowFullScreen
