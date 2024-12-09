@@ -1,4 +1,5 @@
-import React, { useContext, useState } from "react";
+/* eslint-disable react/prop-types */
+import { useContext, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -14,11 +15,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Edit2, X } from "lucide-react";
 import axios from "axios";
 import { AppContext } from "@/utils/store/appContext";
+import { uploadFile } from "@/utils/uploadFile";
 
 function AccountInfo({ isAccountInfoOpen, setIsAccountInfoOpen, client }) {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(client?.user?.name || "");
-  const [phoneNumber, setPhoneNumber] = useState(client?.user?.phoneNumber || "");
+  const [phoneNumber, setPhoneNumber] = useState(
+    client?.user?.phoneNumber || ""
+  );
   const [aboutMe, setAboutMe] = useState(client?.user?.aboutMe || "");
   const [imageFile, setImageFile] = useState(null);
   const _ctx = useContext(AppContext);
@@ -38,7 +42,7 @@ function AccountInfo({ isAccountInfoOpen, setIsAccountInfoOpen, client }) {
     let imageUrl = client?.user?.image_url;
 
     if (imageFile) {
-      imageUrl = URL.createObjectURL(imageFile);
+      imageUrl = await uploadFile(imageFile);
     }
     const updatedUserData = {
       name,
@@ -95,7 +99,9 @@ function AccountInfo({ isAccountInfoOpen, setIsAccountInfoOpen, client }) {
                 src={client?.user?.image_url}
                 alt={client?.user?.name}
               />
-              <AvatarFallback className="bg-primary text-white">{client?.user?.name?.[0]}</AvatarFallback>
+              <AvatarFallback className="bg-primary text-white">
+                {client?.user?.name?.[0]}
+              </AvatarFallback>
             </Avatar>
           </div>
           {isEditing ? (
@@ -163,7 +169,9 @@ function AccountInfo({ isAccountInfoOpen, setIsAccountInfoOpen, client }) {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right font-bold">About Me</Label>
-                <span className="col-span-3">{client?.user?.aboutMe || "Not provided"}</span>
+                <span className="col-span-3">
+                  {client?.user?.aboutMe || "Not provided"}
+                </span>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right font-bold">ID</Label>

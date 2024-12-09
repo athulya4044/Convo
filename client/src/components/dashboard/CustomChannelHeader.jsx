@@ -68,8 +68,8 @@ export default function CustomChannelHeader({ activeTab, setActiveTab }) {
             isAIChannel
               ? logoConvo
               : isOneToOneChat
-              ? otherMembers[0]?.user?.image
-              : channel.data?.image
+              ? otherMembers[0]?.user?.image_url
+              : channel.data?.image_url
           }
           name={displayName}
           size={40}
