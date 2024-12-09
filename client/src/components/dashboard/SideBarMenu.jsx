@@ -18,7 +18,7 @@ import {
   UserPlus,
   BookOpen,
   Eye,
-} from "lucide-react"; 
+} from "lucide-react";
 import { logoConvo } from "@/assets/images";
 import SearchBar from "@/components/dashboard/SearchBar";
 import CustomChannelPreview from "./CustomChannelPreview";
@@ -33,66 +33,70 @@ export default function SidebarMenu({
   setActiveChannel,
 }) {
   const [isAccountInfoOpen, setIsAccountInfoOpen] = useState(false);
-  const [isGrayscale, setIsGrayscale] = useState(false); 
+  const [isGrayscale, setIsGrayscale] = useState(false);
   const navigate = useNavigate();
 
-    // Custom sorting function to pin the AI channel at the top
-    const customSort = (channels) => {
-      const aiChannelId = `${userId}_convoAI`;
-      return channels.sort((a, b) => {
-        if (a.id === aiChannelId) return -1; // AI channel goes to the top
-        if (b.id === aiChannelId) return 1;
-        // Default sorting based on last message timestamp
-        return b.state.last_message_at - a.state.last_message_at;
-      });
-    };
-  
-    const navigateToChat = async ({ channelId, messageId = null }) => {
-      if (!client) return;
-  
-      try {
-        const existingChannels = await client.queryChannels({
-          id: { $eq: channelId },
+  // Custom sorting function to pin the AI channel at the top
+  const customSort = (channels) => {
+    const aiChannelId = `${userId}_convoAI`;
+    return channels.sort((a, b) => {
+      if (a.id === aiChannelId) return -1; // AI channel goes to the top
+      if (b.id === aiChannelId) return 1;
+      // Default sorting based on last message timestamp
+      return b.state.last_message_at - a.state.last_message_at;
+    });
+  };
+
+  const navigateToChat = async ({ channelId, messageId = null }) => {
+    if (!client) return;
+
+    try {
+      let channel;
+
+      // Check if it's a user ID or an existing channel ID
+      const isUserChat =
+        channelId !== client.userID && !channelId.includes(":");
+
+      if (isUserChat) {
+        // For user-to-user chat, create a new channel or get existing one
+        channel = client.channel("messaging", {
+          members: [client.userID, channelId],
         });
-  
-        let channel;
-  
-        if (existingChannels.length > 0) {
-          channel = existingChannels[0];
-        } else {
-          channel = client.channel("messaging", channelId, {
-            members: [channelId, client.userID],
-          });
-          await channel.create();
-        }
-  
-        await channel.watch();
-        setActiveChannel(channel);
-  
-        if (messageId) {
-          setTimeout(() => {
-            const messageElement = document.getElementById(
-              `message-${messageId}`
-            );
-            if (messageElement && chatContainerRef.current) {
-              chatContainerRef.current.scrollTo({
-                top: messageElement.offsetTop - 50,
-                behavior: "smooth",
-              });
-            }
-          }, 500);
-        }
-      } catch (error) {
-        console.error("Error navigating to chat:", error);
+      } else {
+        // For existing channels, just get the channel
+        channel = client.channel("messaging", channelId);
       }
-    };
+
+      // Watch the channel to subscribe to new messages and load initial state
+      await channel.watch();
+
+      // If it's a new channel, it will be created here
+      if (channel.state.messages.length === 0) {
+        await channel.create();
+      }
+
+      setActiveChannel(channel);
+
+      if (messageId) {
+        setTimeout(() => {
+          const messageElement = document.getElementById(`message-${messageId}`);
+          if (messageElement) {
+            messageElement.scrollIntoView({ behavior: "smooth", block: "center" });
+            messageElement.classList.add("highlighted-message");
+          }
+        }, 500);
+      }
+    } catch (error) {
+      console.error("Error navigating to chat:", error);
+    }
+  };
 
   // Load grayscale state from localStorage on component mount
   useEffect(() => {
     const savedGrayscaleState = localStorage.getItem("isGrayscale") === "true";
-    setIsGrayscale(savedGrayscaleState); 
+    setIsGrayscale(savedGrayscaleState);
     if (savedGrayscaleState) {
-      document.body.classList.add("grayscale"); 
+      document.body.classList.add("grayscale");
     } else {
       document.body.classList.remove("grayscale");
     }
@@ -100,8 +104,8 @@ export default function SidebarMenu({
 
   const toggleGrayscale = () => {
     const newState = !isGrayscale;
-    setIsGrayscale(newState); 
-    localStorage.setItem("isGrayscale", newState); 
+    setIsGrayscale(newState);
+    localStorage.setItem("isGrayscale", newState);
     if (newState) {
       document.body.classList.add("grayscale");
     } else {
@@ -138,8 +142,8 @@ export default function SidebarMenu({
             <DropdownMenuItem>
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-2">
-                  <Eye className="h-4 w-4 mr-2"/>
-                    Grayscale
+                  <Eye className="h-4 w-4 mr-2" />
+                  Grayscale
                 </div>
                 <label className="relative inline-flex items-center ml-2 cursor-pointer">
                   <input
