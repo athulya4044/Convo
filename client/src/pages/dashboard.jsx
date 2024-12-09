@@ -170,71 +170,75 @@ export default function Dashboard() {
           </AlertDescription>
         </Alert>
       )}
-      {activeTab === "video" && _ctx.userType === "premium" && <VideoCall />}
-      {activeTab !== "video" ||
-        (_ctx.userType !== "premium" && (
-          <>
-            <Chat client={client} theme="relative messaging light">
-              <div
-                className={`flex ${
-                  _ctx.userType !== "premium" ? "h-[94vh]" : "h-screen"
-                } bg-white`}
-              >
-                <SidebarProvider>
-                  <SidebarMenu
-                    client={client}
-                    userId={userId}
-                    onShowGroupModal={() => setShowCreateGroupModal(true)}
-                    logout={() => _ctx.logout(client)}
-                    setActiveChannel={(channel) => {
-                      setActiveTab("chat");
-                      setActiveChannel(channel);
-                    }}
-                  />
-                  <div
-                    className="relative my-3 flex-1 flex flex-col"
-                    ref={chatContainerRef}
+      {activeTab === "video" && _ctx.userType === "premium" && <VideoCall setActiveTab={setActiveTab}/>}
+      {activeTab === "video" && _ctx.userType !== "premium" && (
+        <>
+          <p>You need to have a premium subscription to use this feature</p>
+        </>
+      )}
+      {activeTab !== "video" && (
+        <>
+          <Chat client={client} theme="relative messaging light">
+            <div
+              className={`flex ${
+                _ctx.userType !== "premium" ? "h-[94vh]" : "h-screen"
+              } bg-white`}
+            >
+              <SidebarProvider>
+                <SidebarMenu
+                  client={client}
+                  userId={userId}
+                  onShowGroupModal={() => setShowCreateGroupModal(true)}
+                  logout={() => _ctx.logout(client)}
+                  setActiveChannel={(channel) => {
+                    setActiveTab("chat");
+                    setActiveChannel(channel);
+                  }}
+                />
+                <div
+                  className="relative my-3 flex-1 flex flex-col"
+                  ref={chatContainerRef}
+                >
+                  <Channel
+                    GiphyPreviewMessage={CustomGiphyPreview}
+                    channel={activeChannel}
+                    EmojiPicker={EmojiPicker}
                   >
-                    <Channel
-                      GiphyPreviewMessage={CustomGiphyPreview}
-                      channel={activeChannel}
-                      EmojiPicker={EmojiPicker}
-                    >
-                      <Window>
-                        <CustomChannelHeader
-                          activeTab={activeTab}
-                          setActiveTab={setActiveTab}
+                    <Window>
+                      <CustomChannelHeader
+                        activeTab={activeTab}
+                        setActiveTab={setActiveTab}
+                      />
+                      {activeTab === "chat" && (
+                        <MessageList
+                          Message={(props) => <CustomMessage {...props} />}
                         />
-                        {activeTab === "chat" && (
-                          <MessageList
-                            Message={(props) => <CustomMessage {...props} />}
-                          />
-                        )}
+                      )}
 
-                        {activeTab === "share" && (
-                          <Share sharedItems={sharedItems} />
-                        )}
+                      {activeTab === "share" && (
+                        <Share sharedItems={sharedItems} />
+                      )}
 
-                        {activeTab === "about" && <About />}
+                      {activeTab === "about" && <About />}
 
-                        {activeTab === "chat" && (
-                          <CustomMessageInput addSharedItem={addSharedItem} />
-                        )}
-                      </Window>
-                      <Thread />
-                    </Channel>
-                  </div>
-                </SidebarProvider>
-              </div>
-              <CreateGroupModal
-                client={client}
-                isOpen={showCreateGroupModal}
-                onClose={() => setShowCreateGroupModal(false)}
-                onGroupCreated={handleGroupCreated}
-              />
-            </Chat>
-          </>
-        ))}
+                      {activeTab === "chat" && (
+                        <CustomMessageInput addSharedItem={addSharedItem} />
+                      )}
+                    </Window>
+                    <Thread />
+                  </Channel>
+                </div>
+              </SidebarProvider>
+            </div>
+            <CreateGroupModal
+              client={client}
+              isOpen={showCreateGroupModal}
+              onClose={() => setShowCreateGroupModal(false)}
+              onGroupCreated={handleGroupCreated}
+            />
+          </Chat>
+        </>
+      )}
       <Payment
         isOpen={showPaymentModal}
         setIsOpen={() => setShowPaymentModal(false)}

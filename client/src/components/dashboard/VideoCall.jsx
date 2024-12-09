@@ -8,12 +8,13 @@ import {
   StreamVideoClient,
   useCallStateHooks,
   CallControls,
+  SpeakerLayout
 } from "@stream-io/video-react-sdk";
 import { LoadingIndicator } from "stream-chat-react";
 import { useContext } from "react";
 import stripSpecialCharacters from "@/utils/stripSpecialCharacters";
 
-function VideoCall() {
+function VideoCall({ setActiveTab }) {
   const _ctx = useContext(AppContext);
   const token = _ctx.streamToken;
   const userId = stripSpecialCharacters(_ctx.email);
@@ -44,7 +45,7 @@ function VideoCall() {
   return (
     <StreamVideo client={client}>
       <StreamCall call={call}>
-        <MyUILayout />
+        <MyUILayout setActiveTab={setActiveTab} />
       </StreamCall>
     </StreamVideo>
   );
@@ -52,12 +53,9 @@ function VideoCall() {
 
 export default VideoCall;
 
-const MyUILayout = () => {
-  const { useCallCallingState, useLocalParticipant, useRemoteParticipants } =
-    useCallStateHooks();
+const MyUILayout = ({ setActiveTab }) => {
+  const { useCallCallingState } = useCallStateHooks();
   const callingState = useCallCallingState();
-  const remoteParticipants = useRemoteParticipants();
-  const localParticipant = useLocalParticipant();
 
   if (callingState !== CallingState.JOINED) {
     return <div>Loading...</div>;
@@ -65,9 +63,8 @@ const MyUILayout = () => {
 
   return (
     <StreamTheme>
-      <MyParticipantList participants={remoteParticipants} />
-      <MyFloatingLocalParticipant participant={localParticipant} />
-      <CallControls />
+      <SpeakerLayout participantsBarPosition='bottom' />
+      <CallControls onLeave={setActiveTab}/>
     </StreamTheme>
   );
 };
