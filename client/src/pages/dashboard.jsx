@@ -10,6 +10,7 @@ import {
   useActionHandler,
   Attachment,
   LoadingIndicator,
+  MessageInput,
 } from "stream-chat-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
@@ -54,12 +55,12 @@ export default function Dashboard() {
   const chatContainerRef = useRef(null);
   const [sharedItems, setSharedItems] = useState({});
 
-  const addSharedItem = (item, channelId) => {
-    setSharedItems((prevItems) => ({
-      ...prevItems,
-      [channelId]: [...(prevItems[channelId] || []), item],
-    }));
-  };
+  // const addSharedItem = (item, channelId) => {
+  //   setSharedItems((prevItems) => ({
+  //     ...prevItems,
+  //     [channelId]: [...(prevItems[channelId] || []), item],
+  //   }));
+  // };
 
   const userId = stripSpecialCharacters(_ctx.email);
   const userToken = _ctx.streamToken;
@@ -210,9 +211,7 @@ export default function Dashboard() {
                         setActiveTab={setActiveTab}
                       />
                       {activeTab === "chat" && (
-                        <MessageList
-                          Message={(props) => <CustomMessage {...props} />}
-                        />
+                        <MessageList />
                       )}
 
                       {activeTab === "share" && (
@@ -222,7 +221,7 @@ export default function Dashboard() {
                       {activeTab === "about" && <About />}
 
                       {activeTab === "chat" && (
-                        <CustomMessageInput addSharedItem={addSharedItem} />
+                        <MessageInput/>
                       )}
                     </Window>
                     <Thread />
