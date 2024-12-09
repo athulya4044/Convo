@@ -20,6 +20,7 @@ import {
   Eye,
 } from "lucide-react"; 
 import { logoConvo } from "@/assets/images";
+import { LogOut, User, ChevronsDownUp, MoreVertical } from "lucide-react";
 import SearchBar from "@/components/dashboard/SearchBar";
 import CustomChannelPreview from "./CustomChannelPreview";
 import AccountInfo from "./AccountInfo";
