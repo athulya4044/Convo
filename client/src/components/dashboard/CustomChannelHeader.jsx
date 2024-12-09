@@ -94,7 +94,7 @@ export default function CustomChannelHeader({ activeTab, setActiveTab }) {
           )}
         </div>
       </div>
-
+      {!isAIChannel && ( <>
       {/* Centered Tabs */}
       <div className="flex-1 flex justify-center space-x-4">
         {["chat", "share", "about"].map((tab) => (
@@ -122,6 +122,8 @@ export default function CustomChannelHeader({ activeTab, setActiveTab }) {
           <FaVideo size={20} />
         </button>
       </div>
+      </>)}
+
     </div>
   );
 }
