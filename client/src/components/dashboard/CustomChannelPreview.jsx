@@ -28,7 +28,7 @@ export default function CustomChannelPreview({ channel, setActiveChannel }) {
     >
       <CardHeader className="p-3 flex flex-row justify-start items-center space-x-3">
         <Avatar
-          image={isAIChannel ? logoConvo : otherMembers[0].user.image_url}
+          image={isAIChannel ? logoConvo : otherMembers[0]?.user?.image_url}
           name={displayName}
           size={40}
           shape="rounded"
