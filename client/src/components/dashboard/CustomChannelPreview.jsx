@@ -5,7 +5,7 @@ import { logoConvo } from "../../assets/images";
 
 export default function CustomChannelPreview({ channel, setActiveChannel }) {
   const { client } = useChatContext();
-  const { name, image_url } = channel.data || {};
+  const { name } = channel.data || {};
   const members = Object.values(channel.state.members);
 
   const otherMembers = members.filter(
@@ -28,7 +28,7 @@ export default function CustomChannelPreview({ channel, setActiveChannel }) {
     >
       <CardHeader className="p-3 flex flex-row justify-start items-center space-x-3">
         <Avatar
-          image={isAIChannel ? logoConvo : image_url}
+          image={isAIChannel ? logoConvo : otherMembers[0].user.image_url}
           name={displayName}
           size={40}
           shape="rounded"
