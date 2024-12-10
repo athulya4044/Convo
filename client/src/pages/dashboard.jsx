@@ -61,6 +61,18 @@ export default function Dashboard() {
   //     [channelId]: [...(prevItems[channelId] || []), item],
   //   }));
   // };
+  // Load shared items from local storage when the component mounts
+  useEffect(() => {
+    const storedItems = JSON.parse(localStorage.getItem("sharedItems"));
+    if (storedItems) {
+      setSharedItems(storedItems);
+    }
+  }, []);
+
+  // Save shared items to local storage whenever they change
+  useEffect(() => {
+    localStorage.setItem("sharedItems", JSON.stringify(sharedItems));
+  }, [sharedItems]);
 
   const userId = stripSpecialCharacters(_ctx.email);
   const userToken = _ctx.streamToken;
@@ -70,9 +82,12 @@ export default function Dashboard() {
       const chatClient = StreamChat.getInstance(
         import.meta.env.VITE_STREAM_API_KEY
       );
+
+      // Connect the user
       await chatClient.connectUser({ id: userId }, userToken);
       setClient(chatClient);
 
+      // Create or get ConvoAI channel
       const convoAIChannel = await getOrCreateConvoAIChannel(
         userId,
         chatClient
@@ -89,10 +104,41 @@ export default function Dashboard() {
         });
         convoAIChannel.hasListener = true;
       }
+
+      // Set listeners for other channels
+      const channels = await chatClient.queryChannels({});
+      channels.forEach((channel) => {
+        if (channel.id !== `${userId}_convoAI` && !channel.hasListener) {
+          channel.on("message.new", (event) => {
+            const newMessage = event.message;
+            if (newMessage.attachments.length > 0) {
+              setSharedItems((prevItems) => {
+                const updatedItems = { ...prevItems };
+                if (!updatedItems[channel.id]) {
+                  updatedItems[channel.id] = []; // Initialize array for this channel
+                }
+                newMessage.attachments.forEach((attachment) => {
+                  const sharedItem = {
+                    url: attachment.image_url || attachment.asset_url,
+                    name: attachment.fallback || "Shared File",
+                    type: attachment.type,
+                  };
+                  updatedItems[channel.id].push(sharedItem); // Add attachment to the channel
+                });
+                return updatedItems;
+              });
+            }
+          });
+          
+          channel.hasListener = true;
+        }
+      });
     };
 
+    // Initialize chat client and channels
     initChat();
 
+    // Cleanup function to disconnect the client
     return () => {
       if (client) client.disconnectUser();
     };
@@ -171,7 +217,9 @@ export default function Dashboard() {
           </AlertDescription>
         </Alert>
       )}
-      {activeTab === "video" && _ctx.userType === "premium" && <VideoCall setActiveTab={setActiveTab}/>}
+      {activeTab === "video" && _ctx.userType === "premium" && (
+        <VideoCall setActiveTab={setActiveTab} />
+      )}
       {activeTab === "video" && _ctx.userType !== "premium" && (
         <>
           <p>You need to have a premium subscription to use this feature</p>
@@ -210,19 +258,17 @@ export default function Dashboard() {
                         activeTab={activeTab}
                         setActiveTab={setActiveTab}
                       />
-                      {activeTab === "chat" && (
-                        <MessageList />
-                      )}
+                      {activeTab === "chat" && <MessageList />}
 
                       {activeTab === "share" && (
-                        <Share sharedItems={sharedItems} />
+                        <Share
+                          sharedItems={sharedItems[activeChannel?.id] || []}
+                        />
                       )}
 
                       {activeTab === "about" && <About />}
 
-                      {activeTab === "chat" && (
-                        <MessageInput/>
-                      )}
+                      {activeTab === "chat" && <MessageInput />}
                     </Window>
                     <Thread />
                   </Channel>
