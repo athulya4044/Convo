@@ -12,6 +12,8 @@ export default function CustomChannelPreview({ channel, setActiveChannel }) {
     (member) => member.user?.id !== client.userID
   );
 
+  const isOneToOneChat = members.length === 2;
+
   const displayName =
     name ||
     otherMembers
@@ -28,7 +30,13 @@ export default function CustomChannelPreview({ channel, setActiveChannel }) {
     >
       <CardHeader className="p-3 flex flex-row justify-start items-center space-x-3">
         <Avatar
-          image={isAIChannel ? logoConvo : otherMembers[0]?.user?.image_url}
+          image={
+            isAIChannel
+              ? logoConvo
+              : isOneToOneChat
+              ? otherMembers[0]?.user?.image_url
+              : null
+          }
           name={displayName}
           size={40}
           shape="rounded"
